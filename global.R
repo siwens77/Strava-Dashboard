@@ -6,7 +6,6 @@ library(dplyr)
 library(lubridate)
 library(fontawesome)
 
-options(plotly.install_msg = FALSE)
 
 ORANGE      <- "#FC4C02"
 ORANGE_LITE <- "#FFE0D4"
