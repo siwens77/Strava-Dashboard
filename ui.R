@@ -241,9 +241,15 @@ ui <- dashboardPage(
               
               fluidRow(
                 box(
-                  title = tagList(icon("chart-bar"), "Distance per Month"),
+                  title = tagList(icon("chart-bar"), "Monthly Activity"),
                   width = 8, class = "box-orange",
-                  plotlyOutput("monthly_dist", height = "260px")
+                  div(style = "display:flex; justify-content:flex-end; margin-bottom:8px;",
+                      radioButtons("ov_metric", NULL,
+                                   choices  = c("Distance" = "distance", "Elevation Gain" = "elevation"),
+                                   selected = "distance",
+                                   inline   = TRUE)
+                  ),
+                  plotlyOutput("monthly_dist", height = "230px")
                 ),
                 box(
                   title = tagList(icon("chart-pie"), "Activity Split"),
@@ -270,8 +276,6 @@ ui <- dashboardPage(
                          tags$span(class = "filter-label", "Date Range"),
                          uiOutput("pf_date_ui"),
                          
-                         tags$span(class = "filter-label", "Heart-Rate Smoothing (days)"),
-                         sliderInput("pf_smooth", NULL, min = 1, max = 30, value = 7, step = 1)
                        )
                 ),
                 
@@ -286,13 +290,8 @@ ui <- dashboardPage(
                        fluidRow(
                          box(
                            title = tagList(icon("tachometer-alt"), "Speed vs Distance"),
-                           width = 7, class = "box-orange",
+                           width = 12, class = "box-orange",
                            plotlyOutput("pf_scatter", height = "220px")
-                         ),
-                         box(
-                           title = tagList(icon("mountain"), "Elevation Gain by Month"),
-                           width = 5, class = "box-orange",
-                           plotlyOutput("pf_elev", height = "220px")
                          )
                        )
                 )
@@ -397,4 +396,4 @@ ui <- dashboardPage(
       )
     ) 
   ) 
-) 
+)

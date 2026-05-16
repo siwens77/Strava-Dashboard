@@ -19,7 +19,7 @@ server <- function(input, output, session) {
                       choices  = c("All", as.character(years)),
                       selected = "All")
   })
-
+  
   ov_data <- reactive({
     df <- activities_raw()
     if (!is.null(input$ov_year) && input$ov_year != "All Years")
@@ -55,7 +55,7 @@ server <- function(input, output, session) {
       df <- df[df$type == input$ins_type, ]
     df
   })
-
+  
   output$kpi_acts <- renderValueBox({
     n <- nrow(ov_data())
     valueBox(
@@ -157,32 +157,51 @@ server <- function(input, output, session) {
     df <- ov_data()
     req(nrow(df) > 0)
     
-    monthly <- df %>%
-      mutate(ym = as.Date(paste0(format(date, "%Y-%m"), "-01"))) %>%
-      group_by(ym, type) %>%
-      summarise(dist = sum(distance_km, na.rm = TRUE), .groups = "drop")
+    metric <- if (!is.null(input$ov_metric)) input$ov_metric else "distance"
     
-    types <- unique(monthly$type)
-    
-    p <- plot_ly()
-    for (t in types) {
-      sub <- monthly[monthly$type == t, ]
-      p <- add_trace(p,
-                     x = sub$ym, y = sub$dist, name = t,
-                     type   = "bar",
-                     marker = list(color = activity_color(t)),
-                     hovertemplate = paste0("<b>", t, "</b><br>%{x|%b %Y}<br>%{y:.1f} km<extra></extra>")
+    if (metric == "elevation") {
+      monthly <- df %>%
+        mutate(ym = as.Date(paste0(format(date, "%Y-%m"), "-01"))) %>%
+        group_by(ym) %>%
+        summarise(val = sum(elevation_gain, na.rm = TRUE), .groups = "drop")
+      
+      p <- plot_ly(monthly,
+                   x = ~ym, y = ~val, type = "bar",
+                   marker = list(color = ORANGE, opacity = 0.85),
+                   hovertemplate = "%{x|%b %Y}<br>%{y:.0f} m<extra></extra>"
       )
+      
+      strava_layout(p, xlab = "", ylab = "meters") %>%
+        layout(xaxis = list(type = "date", tickformat = "%b '%y",
+                            tickfont = list(size = 10)))
+    } else {
+      monthly <- df %>%
+        mutate(ym = as.Date(paste0(format(date, "%Y-%m"), "-01"))) %>%
+        group_by(ym, type) %>%
+        summarise(dist = sum(distance_km, na.rm = TRUE), .groups = "drop")
+      
+      types <- unique(monthly$type)
+      
+      p <- plot_ly()
+      for (t in types) {
+        sub <- monthly[monthly$type == t, ]
+        p <- add_trace(p,
+                       x = sub$ym, y = sub$dist, name = t,
+                       type   = "bar",
+                       marker = list(color = activity_color(t)),
+                       hovertemplate = paste0("<b>", t, "</b><br>%{x|%b %Y}<br>%{y:.1f} km<extra></extra>")
+        )
+      }
+      
+      strava_layout(p, xlab = "", ylab = "km") %>%
+        layout(
+          barmode = "stack",
+          legend  = list(orientation = "h", y = -0.18, x = 0,
+                         font = list(size = 11)),
+          xaxis   = list(type = "date", tickformat = "%b '%y",
+                         tickfont = list(size = 10))
+        )
     }
-    
-    strava_layout(p, xlab = "", ylab = "km") %>%
-      layout(
-        barmode = "stack",
-        legend  = list(orientation = "h", y = -0.18, x = 0,
-                       font = list(size = 11)),
-        xaxis   = list(type = "date", tickformat = "%b '%y",
-                       tickfont = list(size = 10))
-      )
   })
   
   output$ov_donut <- renderPlotly({
@@ -219,23 +238,12 @@ server <- function(input, output, session) {
       arrange(date)
     req(nrow(df) >= 2)
     
-    smooth_n <- max(1, input$pf_smooth %||% 7)
-    df$hr_roll <- stats::filter(df$max_hr,
-                                rep(1/smooth_n, smooth_n),
-                                sides = 2)
-    
     p <- plot_ly() %>%
       add_trace(data = df,
                 x = ~date, y = ~max_hr, name = "Max HR in Training",
                 type   = "scatter", mode = "markers",
                 marker = list(color = paste0(ORANGE, "55"), size = 5),
                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>Max HR: %{y} bpm<extra></extra>"
-      ) %>%
-      add_trace(data = df[!is.na(df$hr_roll), ],
-                x = ~date, y = ~hr_roll, name = "Trend",
-                type   = "scatter", mode = "lines",
-                line   = list(color = ORANGE, width = 2.5),
-                hoverinfo = "skip"
       )
     
     strava_layout(p, xlab = "", ylab = "bpm") %>%
