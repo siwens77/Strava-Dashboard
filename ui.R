@@ -1,6 +1,22 @@
 custom_css <- "
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+/* ===== METRIC TOGGLE PILLS ===== */
+.metric-toggle { display:flex; gap:6px; }
+.metric-pill {
+  padding: 5px 14px; border-radius: 20px; font-size: 11px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: .7px;
+  border: 1.5px solid #e5e7eb; background: white; color: #9ca3af;
+  cursor: pointer; transition: all .18s; line-height: 1.4;
+  font-family: 'Inter', sans-serif;
+}
+.metric-pill:hover { border-color: #FC4C02; color: #FC4C02; }
+.metric-pill.active {
+  background: #FC4C02; border-color: #FC4C02; color: white;
+  box-shadow: 0 2px 8px rgba(252,76,2,.30);
+}
+
+
 /* ===== BASE ===== */
 body, .main-header, .main-sidebar, .content-wrapper, .box, .value-box, h1, h2, h3, p, span { 
   font-family: 'Inter', -apple-system, sans-serif !important; 
@@ -82,7 +98,7 @@ hr.sidebar-hr { border-color: #2a2a35 !important; margin: 10px 18px !important; 
 .value-box p.value            { font-size: 22px !important; font-weight: 800 !important; }
 .value-box p.value-box-text   { font-size: 10px !important; text-transform: uppercase; letter-spacing: .9px; opacity: .85; }
 .value-box .value-box-icon    { font-size: 38px !important; width: 68px !important; }
-table.dataTable { border-collapse: separate !important; border-spacing: 0 !important; }
+table.dataTable { border-collapse: collapse !important; border-spacing: 0 !important; }
 table.dataTable thead th {
   background: #f9fafb !important; color: #6b7280 !important;
   font-size: 10px !important; font-weight: 700 !important;
@@ -95,7 +111,6 @@ table.dataTable tbody td {
   font-size: 12px !important; padding: 9px 11px !important; color: #374151 !important;
 }
 table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; cursor: pointer; }
-table.dataTable tbody tr.selected td { background: rgba(252,76,2,.10) !important; }
 .dataTables_info    { font-size: 11px !important; color: #9ca3af !important; }
 .dataTables_length select,
 .dataTables_filter input {
@@ -204,7 +219,31 @@ ui <- dashboardPage(
   dashboardBody(
     
     tags$head(
-      tags$style(HTML(custom_css))
+      tags$style(HTML(custom_css)),
+      tags$script(HTML("
+        // Metric pill toggle
+        $(document).on('click', '.metric-pill', function() {
+          $('.metric-pill').removeClass('active');
+          $(this).addClass('active');
+          Shiny.setInputValue('ov_metric', $(this).data('val'), {priority: 'event'});
+        });
+
+        // Highlight a row in ins_top_table without re-rendering
+        Shiny.addCustomMessageHandler('highlightInsRow', function(msg) {
+          var table = $('#ins_top_table table').DataTable();
+          if (!table) return;
+          $('#ins_top_table table tbody tr').css({'background-color': '', 'font-weight': ''});
+          var pageLen  = table.page.len();
+          var curPage  = table.page();
+          var rowOnPage = msg.row - curPage * pageLen;
+          if (rowOnPage >= 0 && rowOnPage < pageLen) {
+            $('#ins_top_table table tbody tr').eq(rowOnPage).css({
+              'background-color': 'rgba(252,76,2,.10)',
+              'font-weight': '700'
+            });
+          }
+        });
+      "))
     ),
     
     tabItems(
@@ -243,11 +282,13 @@ ui <- dashboardPage(
                 box(
                   title = tagList(icon("chart-bar"), "Monthly Activity"),
                   width = 8, class = "box-orange",
-                  div(style = "display:flex; justify-content:flex-end; margin-bottom:8px;",
-                      radioButtons("ov_metric", NULL,
-                                   choices  = c("Distance" = "distance", "Elevation Gain" = "elevation"),
-                                   selected = "distance",
-                                   inline   = TRUE)
+                  div(style = "display:flex; justify-content:flex-end; margin-bottom:10px;",
+                      div(class = "metric-toggle",
+                          tags$button(class = "metric-pill active", `data-val` = "distance",
+                                      icon("road"), " Distance"),
+                          tags$button(class = "metric-pill", `data-val` = "elevation",
+                                      icon("mountain"), " Elevation")
+                      )
                   ),
                   plotlyOutput("monthly_dist", height = "230px")
                 ),
@@ -262,7 +303,6 @@ ui <- dashboardPage(
       tabItem(tabName = "performance",
               
               fluidRow(
-                
                 column(3,
                        box(
                          title  = tagList(icon("sliders-h"), "Controls"),
@@ -274,25 +314,34 @@ ui <- dashboardPage(
                                      selected = "All", width = "100%"),
                          
                          tags$span(class = "filter-label", "Date Range"),
-                         uiOutput("pf_date_ui"),
-                         
+                         uiOutput("pf_date_ui")
                        )
                 ),
                 
                 column(9,
                        fluidRow(
-                         box(
-                           title = tagList(icon("heartbeat"), "Heart Rate Over Time"),
-                           width = 12, class = "box-orange",
-                           plotlyOutput("pf_hr", height = "210px")
-                         )
+                         box(title = tagList(icon("heartbeat"), "Heart Rate Over Time"),
+                             width = 6, class = "box-orange",
+                             plotlyOutput("pf_hr", height = "170px")),
+                         box(title = tagList(icon("tachometer-alt"), "Speed vs Distance"),
+                             width = 6, class = "box-orange",
+                             plotlyOutput("pf_scatter", height = "170px"))
                        ),
                        fluidRow(
-                         box(
-                           title = tagList(icon("tachometer-alt"), "Speed vs Distance"),
-                           width = 12, class = "box-orange",
-                           plotlyOutput("pf_scatter", height = "220px")
-                         )
+                         box(title = tagList(icon("mountain"), "Elevation Gain Over Time"),
+                             width = 6, class = "box-orange",
+                             plotlyOutput("pf_elev_time", height = "170px")),
+                         box(title = tagList(icon("clock"), "Activity Duration Distribution"),
+                             width = 6, class = "box-orange",
+                             plotlyOutput("pf_duration", height = "170px"))
+                       ),
+                       fluidRow(
+                         box(title = tagList(icon("fire"), "Calories Over Time"),
+                             width = 6, class = "box-orange",
+                             plotlyOutput("pf_cals", height = "170px")),
+                         box(title = tagList(icon("chart-bar"), "Distance Distribution"),
+                             width = 6, class = "box-orange",
+                             plotlyOutput("pf_dist_hist", height = "170px"))
                        )
                 )
               )
@@ -336,7 +385,10 @@ ui <- dashboardPage(
                          box(
                            title = tagList(icon("medal"), "Top Activities"),
                            width = 12, class = "box-orange",
-                           DTOutput("ins_top_table")
+                           uiOutput("ins_hover_info"),
+                           div(id = "ins_table_wrap",
+                               DTOutput("ins_top_table")
+                           )
                          )
                        )
                 )

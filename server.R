@@ -1,5 +1,24 @@
 server <- function(input, output, session) {
   
+  # ---- Helper: return a clean empty plotly when no data ----
+  empty_plot <- function(msg = "No data for selected filters") {
+    plot_ly(type = "scatter", mode = "markers") %>%
+      layout(
+        paper_bgcolor = "transparent",
+        plot_bgcolor  = "transparent",
+        xaxis = list(visible = FALSE, showgrid = FALSE, zeroline = FALSE),
+        yaxis = list(visible = FALSE, showgrid = FALSE, zeroline = FALSE),
+        annotations = list(list(
+          text      = paste0("<b>", msg, "</b>"),
+          xref      = "paper", yref = "paper",
+          x = 0.5, y = 0.5, showarrow = FALSE,
+          font      = list(size = 13, color = "#d1d5db",
+                           family = "Inter, sans-serif")
+        )),
+        margin = list(l = 10, r = 10, t = 10, b = 10)
+      ) %>%
+      config(displayModeBar = FALSE)
+  }
   activities_raw <- reactive({
     load_activities("activities.csv")
   })
@@ -98,7 +117,7 @@ server <- function(input, output, session) {
   
   output$heatmap_cal <- renderPlotly({
     df <- ov_data()
-    req(nrow(df) > 0)
+    if (nrow(df) == 0) return(empty_plot())
     
     yr <- if (!is.null(input$ov_year) && input$ov_year != "All Years")
       as.integer(input$ov_year)
@@ -155,7 +174,7 @@ server <- function(input, output, session) {
   
   output$monthly_dist <- renderPlotly({
     df <- ov_data()
-    req(nrow(df) > 0)
+    if (nrow(df) == 0) return(empty_plot())
     
     metric <- if (!is.null(input$ov_metric)) input$ov_metric else "distance"
     
@@ -206,7 +225,7 @@ server <- function(input, output, session) {
   
   output$ov_donut <- renderPlotly({
     df <- ov_data()
-    req(nrow(df) > 0)
+    if (nrow(df) == 0) return(empty_plot())
     
     split <- df %>%
       count(type, name = "n") %>%
@@ -236,7 +255,7 @@ server <- function(input, output, session) {
     df <- pf_filtered() %>%
       filter(!is.na(max_hr)) %>%
       arrange(date)
-    req(nrow(df) >= 2)
+    if (nrow(df) < 2) return(empty_plot("No heart rate data available"))
     
     p <- plot_ly() %>%
       add_trace(data = df,
@@ -255,7 +274,7 @@ server <- function(input, output, session) {
   output$pf_scatter <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(avg_speed), !is.na(distance_km), avg_speed > 0)
-    req(nrow(df) > 0)
+    if (nrow(df) == 0) return(empty_plot())
     
     types <- unique(df$type)
     p     <- plot_ly()
@@ -266,129 +285,277 @@ server <- function(input, output, session) {
                      data   = sub,
                      x      = ~distance_km, y = ~avg_speed,
                      name   = t, type = "scatter", mode = "markers",
-                     marker = list(color = activity_color(t), size = 7, opacity = 0.7),
-                     hovertemplate = paste0(
-                       "<b>", t, "</b><br>",
-                       "%{x:.1f} km @ %{y:.1f} km/h<extra></extra>")
+                     marker = list(color = activity_color(t), size = 6, opacity = 0.6),
+                     hovertemplate = paste0("<b>", t, "</b><br>%{x:.1f} km @ %{y:.1f} km/h<extra></extra>")
       )
     }
     
-    strava_layout(p, xlab = "<b>Distance (km)</b>", ylab = "<b>Avg Speed (km/h)</b>") %>%
+    # Loess trend line across all points
+    if (nrow(df) >= 5) {
+      df_sorted <- df %>% arrange(distance_km)
+      lo <- loess(avg_speed ~ distance_km, data = df_sorted, span = 0.6)
+      df_sorted$trend <- predict(lo)
+      p <- add_trace(p,
+                     data = df_sorted,
+                     x = ~distance_km, y = ~trend,
+                     name = "Trend", type = "scatter", mode = "lines",
+                     line = list(color = ORANGE, width = 2.5, dash = "solid"),
+                     hoverinfo = "skip", showlegend = TRUE
+      )
+    }
+    
+    strava_layout(p, xlab = "Distance (km)", ylab = "Avg Speed (km/h)") %>%
       layout(
-        legend = list(orientation = "h", y = -0.5, x = 0, font = list(size = 11)),
-        xaxis = list(
-          tickfont = list(family = "Inter, sans-serif", color = "#4b5563", size = 11, weight = "bold"),
-          showline = TRUE,
-          linecolor = "#e5e7eb",
-          linewidth = 2,
-          mirror = FALSE
-        ), 
-        yaxis = list(
-          tickfont = list(family = "Inter, sans-serif", color = "#4b5563", size = 11, weight = "bold"),
-          showline = TRUE,
-          linecolor = "#e5e7eb",
-          linewidth = 2,
-          mirror = FALSE
-        ),
-        margin = list(b = 80, l = 60)
+        legend = list(orientation = "h", y = -0.25, x = 0, font = list(size = 10)),
+        margin = list(b = 60, l = 50)
       )
   })
   
-  # ---- VIZ 6: ELEVATION BAR (Performance) --------------------
-  output$pf_elev <- renderPlotly({
-    df <- pf_filtered()
-    req(nrow(df) > 0)
+  # ---- Elevation gain over time (scatter) ----
+  output$pf_elev_time <- renderPlotly({
+    df <- pf_filtered() %>%
+      filter(!is.na(elevation_gain), elevation_gain > 0) %>%
+      arrange(date)
+    if (nrow(df) == 0) return(empty_plot("No elevation data"))
     
-    col_use <- "elevation_gain"
+    p <- plot_ly(df,
+                 x = ~date, y = ~elevation_gain,
+                 type = "scatter", mode = "markers",
+                 marker = list(color = paste0(ORANGE, "66"), size = 5),
+                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.0f} m<extra></extra>",
+                 showlegend = FALSE)
     
-    monthly <- df %>%
-      mutate(ym = as.Date(paste0(format(date, "%Y-%m"), "-01"))) %>%
-      group_by(ym) %>%
-      summarise(val = sum(.data[[col_use]], na.rm = TRUE), .groups = "drop")
+    if (nrow(df) >= 5) {
+      df$idx <- seq_len(nrow(df))
+      lo <- loess(elevation_gain ~ idx, data = df, span = 0.4)
+      df$trend <- predict(lo)
+      p <- add_trace(p, data = df[!is.na(df$trend),],
+                     x = ~date, y = ~trend, name = "Trend",
+                     type = "scatter", mode = "lines",
+                     line = list(color = ORANGE, width = 2), hoverinfo = "skip")
+    }
     
-    p <- plot_ly(monthly,
-                 x = ~ym, y = ~val, type = "bar",
-                 marker = list(color = ORANGE, opacity = 0.85),
-                 hovertemplate = "%{x|%b %Y}<br>%{y:.0f} m<extra></extra>"
-    )
+    strava_layout(p, xlab = "", ylab = "m") %>%
+      layout(xaxis = list(type = "date"), showlegend = FALSE)
+  })
+  
+  # ---- Duration distribution (histogram) ----
+  output$pf_duration <- renderPlotly({
+    df <- pf_filtered() %>%
+      filter(!is.na(moving_time_min), moving_time_min > 0)
+    if (nrow(df) == 0) return(empty_plot("No duration data"))
     
-    strava_layout(p, xlab = "", ylab = "meters") %>%
-      layout(xaxis = list(type = "date", tickformat = "%b '%y",
-                          tickfont = list(size = 10)))
+    plot_ly(df, x = ~moving_time_min,
+            type = "histogram", nbinsx = 25,
+            marker = list(color = ORANGE, opacity = 0.8,
+                          line = list(color = "white", width = 0.5)),
+            hovertemplate = "%{x:.0f} min<br>%{y} activities<extra></extra>") %>%
+      strava_layout(xlab = "Duration (min)", ylab = "Count") %>%
+      layout(showlegend = FALSE, margin = list(l = 45, b = 45))
+  })
+  
+  # ---- Calories over time ----
+  output$pf_cals <- renderPlotly({
+    df <- pf_filtered() %>%
+      filter(!is.na(calories), calories > 0) %>%
+      arrange(date)
+    if (nrow(df) == 0) return(empty_plot("No calorie data"))
+    
+    p <- plot_ly(df,
+                 x = ~date, y = ~calories,
+                 type = "scatter", mode = "markers",
+                 marker = list(color = paste0(ORANGE, "66"), size = 5),
+                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.0f} kcal<extra></extra>",
+                 showlegend = FALSE)
+    
+    if (nrow(df) >= 5) {
+      df$idx <- seq_len(nrow(df))
+      lo <- loess(calories ~ idx, data = df, span = 0.4)
+      df$trend <- predict(lo)
+      p <- add_trace(p, data = df[!is.na(df$trend),],
+                     x = ~date, y = ~trend,
+                     type = "scatter", mode = "lines",
+                     line = list(color = ORANGE, width = 2), hoverinfo = "skip",
+                     showlegend = FALSE)
+    }
+    
+    strava_layout(p, xlab = "", ylab = "kcal") %>%
+      layout(xaxis = list(type = "date"), showlegend = FALSE)
+  })
+  
+  # ---- Distance distribution (histogram) ----
+  output$pf_dist_hist <- renderPlotly({
+    df <- pf_filtered() %>%
+      filter(!is.na(distance_km), distance_km > 0)
+    if (nrow(df) == 0) return(empty_plot())
+    
+    plot_ly(df, x = ~distance_km,
+            type = "histogram", nbinsx = 25,
+            marker = list(color = ORANGE, opacity = 0.8,
+                          line = list(color = "white", width = 0.5)),
+            hovertemplate = "%{x:.1f} km<br>%{y} activities<extra></extra>") %>%
+      strava_layout(xlab = "Distance (km)", ylab = "Count") %>%
+      layout(showlegend = FALSE, margin = list(l = 45, b = 45))
+  })
+  
+  # Shared reactive: the pace dataframe used by both chart and click handler
+  ins_pace_df <- reactive({
+    ins_filtered() %>%
+      filter(!is.na(avg_speed), avg_speed > 0) %>%
+      arrange(date) %>%
+      mutate(row_key = row_number())
   })
   
   output$ins_pace <- renderPlotly({
+    df <- ins_pace_df()
+    if (nrow(df) < 5) return(empty_plot("Not enough data — need at least 5 activities"))
+    
+    plot_ly(source = "ins_pace") %>%
+      add_trace(data = df,
+                x = ~date, y = ~avg_speed,
+                key = ~row_key,
+                type   = "scatter", mode = "markers",
+                marker = list(color = paste0(ORANGE, "55"), size = 6),
+                hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.1f} km/h<extra></extra>",
+                showlegend = FALSE
+      ) %>%
+      strava_layout(xlab = "", ylab = "km/h") %>%
+      layout(xaxis = list(type = "date"))
+  })
+  
+  # Observer: table row click → highlight that point on the chart via proxy
+  observe({
+    sel <- input$ins_top_table_rows_selected
+    proxy <- plotlyProxy("ins_pace", session)
+    
+    # Always remove old highlight trace first (trace index 1, 0-based)
+    plotlyProxyInvoke(proxy, "deleteTraces", list(1L))
+    
+    if (!is.null(sel) && length(sel) > 0) {
+      pace_df  <- ins_pace_df()
+      tbl_df   <- ins_filtered() %>% arrange(desc(date))
+      if (sel > nrow(tbl_df)) return()
+      
+      clicked_date <- tbl_df$date[sel]
+      hit <- pace_df %>% filter(date == clicked_date)
+      if (nrow(hit) == 0) return()
+      
+      plotlyProxyInvoke(proxy, "addTraces", list(
+        x          = list(as.character(hit$date[1])),
+        y          = list(hit$avg_speed[1]),
+        type       = "scatter",
+        mode       = "markers",
+        marker     = list(color = ORANGE, size = 13,
+                          line = list(color = "white", width = 2)),
+        hovertemplate = paste0("<b>", hit$date[1], "</b><br>",
+                               round(hit$avg_speed[1], 1), " km/h<extra></extra>"),
+        showlegend = FALSE
+      ))
+    }
+  })
+  
+  # Reactive: row index of hovered point in ins_pace
+  ins_hover_key <- reactive({
+    ev <- event_data("plotly_hover", source = "ins_pace")
+    if (is.null(ev)) return(NULL)
+    ev$key[1]
+  })
+  
+  output$ins_hover_info <- renderUI({
+    key <- ins_hover_key()
+    if (is.null(key)) return(NULL)
+    
     df <- ins_filtered() %>%
       filter(!is.na(avg_speed), avg_speed > 0) %>%
       arrange(date)
-    req(nrow(df) >= 5)
+    if (as.integer(key) > nrow(df)) return(NULL)
+    row <- df[as.integer(key), ]
     
-    window <- min(30, nrow(df))
-    df$roll_speed <- stats::filter(df$avg_speed,
-                                   rep(1/window, window), sides = 1)
-    
-    p <- plot_ly() %>%
-      add_trace(data = df,
-                x = ~date, y = ~avg_speed, name = "Per Activity",
-                type   = "scatter", mode = "markers",
-                marker = list(color = paste0(ORANGE, "44"), size = 5),
-                hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.1f} km/h<extra></extra>"
-      ) %>%
-      add_trace(data = df[!is.na(df$roll_speed), ],
-                x = ~date, y = ~roll_speed, name = "30-day avg",
-                type = "scatter", mode = "lines",
-                line = list(color = ORANGE, width = 2.5),
-                hoverinfo = "skip"
-      )
-    
-    strava_layout(p, xlab = "", ylab = "km/h") %>%
-      layout(
-        legend = list(orientation = "h", x = 0, y = -0.2,
-                      font = list(size = 11)),
-        xaxis  = list(type = "date")
-      )
+    tags$div(
+      style = paste0(
+        "background: rgba(252,76,2,.07); border-left: 3px solid #FC4C02;",
+        "border-radius: 8px; padding: 8px 14px; margin-bottom: 10px;",
+        "display: flex; gap: 18px; align-items: center; flex-wrap: wrap;",
+        "font-size: 12px; font-family: 'Inter', sans-serif;"
+      ),
+      tags$span(style = "font-weight:700; color:#FC4C02;",
+                icon("crosshairs"), " ", format(row$date, "%d %b %Y")),
+      tags$span(style = "color:#374151;",
+                tags$b(row$name)),
+      tags$span(style = "color:#6b7280;",
+                icon("road"), " ", round(row$distance_km, 1), " km"),
+      tags$span(style = "color:#6b7280;",
+                icon("tachometer-alt"), " ", round(row$avg_speed, 1), " km/h"),
+      if (!is.na(row$elevation_gain) && row$elevation_gain > 0)
+        tags$span(style = "color:#6b7280;",
+                  icon("mountain"), " ", row$elevation_gain, " m")
+    )
   })
   
+  # Table renders once per filter change only — NOT on hover
   output$ins_top_table <- renderDT({
     df <- ins_filtered()
-    req(nrow(df) > 0) 
+    if (nrow(df) == 0) return(datatable(
+      data.frame(Message = "No data for selected filters"),
+      rownames = FALSE, options = list(dom = "t")
+    ))
     
     table_data <- df %>%
-      arrange(desc(date)) %>% 
-      transmute(
+      arrange(desc(date)) %>%
+      mutate(
         Date        = format(date, "%d %b %Y"),
         Name        = name,
         Type        = type,
         `Dist (km)` = round(distance_km, 2),
         `Elev (m)`  = elevation_gain,
-        Calories    = ifelse(!is.na(calories) & calories > 0, calories, "—"),
-        Duration    = ifelse(!is.na(moving_time_min), moving_time_min, "—"),
-        `Max HR`    = ifelse(!is.na(max_hr), max_hr, "—")
-      )
+        Calories    = ifelse(!is.na(calories) & calories > 0, as.character(calories), "—"),
+        Duration    = ifelse(!is.na(moving_time_min), as.character(moving_time_min), "—"),
+        `Max HR`    = ifelse(!is.na(max_hr), as.character(max_hr), "—")
+      ) %>%
+      select(Date, Name, Type, `Dist (km)`, `Elev (m)`, Calories, Duration, `Max HR`)
     
     datatable(
       table_data,
       rownames  = FALSE,
-      selection = "none",
+      selection = list(mode = "single", target = "row"),
       class     = "compact hover",
       options   = list(
-        pageLength = 10, 
+        pageLength = 10,
         scrollX    = FALSE,
         dom        = "tip",
         columnDefs = list(
-          list(className = "dt-center", targets = 3:7) 
+          list(className = "dt-center", targets = 3:7)
         )
       )
     ) %>%
-      formatStyle("Type",
-                  backgroundColor = styleEqual(
-                    names(TYPE_COLORS),
-                    paste0(unlist(TYPE_COLORS), "22")),
-                  color = styleEqual(
-                    names(TYPE_COLORS),
-                    unlist(TYPE_COLORS)),
-                  fontWeight = "bold"
+      formatStyle(
+        "Type",
+        backgroundColor = styleEqual(names(TYPE_COLORS), paste0(unlist(TYPE_COLORS), "22")),
+        color           = styleEqual(names(TYPE_COLORS), unlist(TYPE_COLORS)),
+        fontWeight      = "bold"
       )
+  })
+  
+  # Separate observer: highlight table row on hover via JS proxy (no full re-render)
+  observe({
+    key <- ins_hover_key()
+    df <- ins_filtered()
+    if (is.null(key) || nrow(df) == 0) return()
+    
+    pace_df <- df %>%
+      filter(!is.na(avg_speed), avg_speed > 0) %>%
+      arrange(date)
+    
+    k <- as.integer(key)
+    if (k < 1 || k > nrow(pace_df)) return()
+    hovered_date <- pace_df$date[k]
+    
+    table_sorted <- df %>% arrange(desc(date))
+    row_idx <- which(table_sorted$date == hovered_date)   # 1-indexed
+    if (length(row_idx) == 0) return()
+    
+    # Send highlight info to JS
+    session$sendCustomMessage("highlightInsRow", list(row = row_idx[1] - 1))  # 0-indexed
   })
   
   output$personal_records <- renderUI({
