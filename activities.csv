@@ -1,4 +1,5 @@
 activity_id,date,name,type,description,elapsed_time_s,distance_km,max_hr,relative_effort,elapsed_time2,moving_time_s,distance_m,max_speed,avg_speed,elevation_gain,elevation_loss,elevation_low,elevation_high,max_grade,avg_grade,calories
+18572896795,2026-05-19,Evening HIIT,Workout,,4631,0.0,186.0,151.0,4631,4631,0.0,0.0,0.0,0,0,0.0,0.0,,,1049.0
 18527681795,2026-05-16,Lunch Run,Run,,4114,15.02,191.0,252.0,4114,4111,15015.5,5.327,3.653,25.2,0,89.4,97.2,,,1093.0
 18481374058,2026-05-12,Evening HIIT,Workout,,4616,0.0,184.0,91.0,4616,4616,0.0,0.0,0.0,0,0,0.0,0.0,,,972.0
 18389867205,2026-05-05,Evening HIIT,Workout,dziś piłka,4769,0.0,191.0,138.0,4769,4769,0.0,0.0,0.0,0,0,0.0,0.0,,,1097.0
