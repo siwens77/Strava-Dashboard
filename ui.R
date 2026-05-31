@@ -1,6 +1,32 @@
 custom_css <- "
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+/* ===== CHAT BUBBLES ===== */
+.chat-wrap { display: flex; flex-direction: column; gap: 12px; padding: 4px 0; }
+.chat-row { display: flex; align-items: flex-end; gap: 8px; }
+.user-row  { flex-direction: row-reverse; }
+.chat-bubble {
+  max-width: 72%; padding: 10px 14px; border-radius: 18px;
+  font-size: 13px; line-height: 1.6; word-wrap: break-word;
+  font-family: 'Inter', sans-serif;
+}
+.chat-bubble.user {
+  background: #FC4C02; color: white;
+  border-bottom-right-radius: 4px;
+}
+.chat-bubble.assistant {
+  background: #f3f4f6; color: #111827;
+  border-bottom-left-radius: 4px;
+}
+.chat-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.avatar-user      { background: #FC4C02; color: white; }
+.avatar-assistant { background: #e5e7eb; color: #374151; }
+
+
 /* ===== METRIC TOGGLE PILLS ===== */
 .metric-toggle { display:flex; gap:6px; }
 .metric-pill {
@@ -212,6 +238,7 @@ ui <- dashboardPage(
       menuItem("Insights",    tabName = "insights",    icon = icon("lightbulb")),
       tags$hr(class = "sidebar-hr"),
       tags$div(class = "header", "INFO"),
+      menuItem("AI Chatbot", tabName = "ai_chatbot", icon = icon("robot")),
       menuItem("About & Help",tabName = "about",       icon = icon("info-circle"))
     )
   ),
@@ -242,6 +269,13 @@ ui <- dashboardPage(
               'font-weight': '700'
             });
           }
+        });
+
+        // Auto-scroll chat container to bottom when new assistant response arrives
+        Shiny.addCustomMessageHandler('scrollChatBottom', function(msg) {
+          var el = document.getElementById('chat_history_wrap_conv');
+          if (!el) return;
+          el.scrollTop = el.scrollHeight;
         });
       "))
     ),
@@ -315,7 +349,8 @@ ui <- dashboardPage(
                          
                          tags$span(class = "filter-label", "Date Range"),
                          uiOutput("pf_date_ui")
-                       )
+                       ),
+                       
                 ),
                 
                 column(9,
@@ -335,14 +370,14 @@ ui <- dashboardPage(
                              width = 6, class = "box-orange",
                              plotlyOutput("pf_duration", height = "170px"))
                        ),
-                       fluidRow(
+                fluidRow(
                          box(title = tagList(icon("fire"), "Calories Over Time"),
                              width = 6, class = "box-orange",
                              plotlyOutput("pf_cals", height = "170px")),
                          box(title = tagList(icon("chart-bar"), "Distance Distribution"),
                              width = 6, class = "box-orange",
                              plotlyOutput("pf_dist_hist", height = "170px"))
-                       )
+                )
                 )
               )
       ),
@@ -376,7 +411,7 @@ ui <- dashboardPage(
                 column(9,
                        fluidRow(
                          box(
-                           title = tagList(icon("chart-line"), "Average Speed Trend (30-day rolling)"),
+                           title = tagList(icon("chart-line"), "Average Speed Trend"),
                            width = 12, class = "box-orange",
                            plotlyOutput("ins_pace", height = "200px")
                          )
@@ -395,6 +430,26 @@ ui <- dashboardPage(
               )
       ),
       
+      tabItem(tabName = "ai_chatbot",
+               
+               fluidRow(
+                 column(12,
+                        
+                        box(
+                          title = tagList(icon("robot"), "AI Chatbot"),
+                          width = 12, class = "box-orange",
+                          div(id = "chat_history_wrap_conv", style = "white-space: pre-wrap; max-height: 560px; overflow: auto; padding: 12px; background: #ffffff; border-radius: 6px;",
+                              uiOutput("chat_history")
+                          ),
+                          div(style = "margin-top: 10px;",
+                              textAreaInput("chat_prompt", NULL, placeholder = "Write a message...", width = "100%", height = "90px"),
+                              actionButton("chat_send", "Send", class = "btn btn-primary", style = "margin-top: 8px; width: 100%;")
+                          )
+                        )
+                 )
+               )
+      ),
+
       tabItem(tabName = "about",
               
               fluidRow(

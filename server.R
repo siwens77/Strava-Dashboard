@@ -2,8 +2,8 @@ server <- function(input, output, session) {
   
   # ---- Helper: return a clean empty plotly when no data ----
   empty_plot <- function(msg = "No data for selected filters") {
-    plot_ly(type = "scatter", mode = "markers") %>%
-      layout(
+    plotly::plot_ly(type = "scatter", mode = "markers") %>%
+      plotly::layout(
         paper_bgcolor = "transparent",
         plot_bgcolor  = "transparent",
         xaxis = list(visible = FALSE, showgrid = FALSE, zeroline = FALSE),
@@ -17,8 +17,12 @@ server <- function(input, output, session) {
         )),
         margin = list(l = 10, r = 10, t = 10, b = 10)
       ) %>%
-      config(displayModeBar = FALSE)
+      plotly::config(displayModeBar = FALSE)
   }
+
+  # Ensure local layout/config refer to plotly (httr masks these names)
+  layout <- plotly::layout
+  config <- plotly::config
   activities_raw <- reactive({
     load_activities("activities.csv")
   })
@@ -74,7 +78,7 @@ server <- function(input, output, session) {
       df <- df[df$type == input$ins_type, ]
     df
   })
-  
+
   output$kpi_acts <- renderValueBox({
     n <- nrow(ov_data())
     valueBox(
@@ -142,7 +146,7 @@ server <- function(input, output, session) {
         lbl  = format(date, "%d %b %Y")
       )
     
-    plot_ly(all_days,
+    plotly::plot_ly(all_days,
             x = ~wk, y = ~dow, z = ~n,
             type          = "heatmap",
             colorscale    = list(c(0,"#f3f4f6"), c(0.01,"#ffd4c2"), c(1, ORANGE)),
@@ -184,7 +188,7 @@ server <- function(input, output, session) {
         group_by(ym) %>%
         summarise(val = sum(elevation_gain, na.rm = TRUE), .groups = "drop")
       
-      p <- plot_ly(monthly,
+      p <- plotly::plot_ly(monthly,
                    x = ~ym, y = ~val, type = "bar",
                    marker = list(color = ORANGE, opacity = 0.85),
                    hovertemplate = "%{x|%b %Y}<br>%{y:.0f} m<extra></extra>"
@@ -201,10 +205,10 @@ server <- function(input, output, session) {
       
       types <- unique(monthly$type)
       
-      p <- plot_ly()
+      p <- plotly::plot_ly()
       for (t in types) {
         sub <- monthly[monthly$type == t, ]
-        p <- add_trace(p,
+        p <- plotly::add_trace(p,
                        x = sub$ym, y = sub$dist, name = t,
                        type   = "bar",
                        marker = list(color = activity_color(t)),
@@ -231,7 +235,7 @@ server <- function(input, output, session) {
       count(type, name = "n") %>%
       arrange(desc(n))
     
-    plot_ly(split,
+    plotly::plot_ly(split,
             labels  = ~type, values = ~n,
             type    = "pie", hole = 0.55,
             marker  = list(colors = activity_color(split$type),
@@ -257,8 +261,8 @@ server <- function(input, output, session) {
       arrange(date)
     if (nrow(df) < 2) return(empty_plot("No heart rate data available"))
     
-    p <- plot_ly() %>%
-      add_trace(data = df,
+    p <- plotly::plot_ly() %>%
+      plotly::add_trace(data = df,
                 x = ~date, y = ~max_hr, name = "Max HR in Training",
                 type   = "scatter", mode = "markers",
                 marker = list(color = paste0(ORANGE, "55"), size = 5),
@@ -277,11 +281,11 @@ server <- function(input, output, session) {
     if (nrow(df) == 0) return(empty_plot())
     
     types <- unique(df$type)
-    p     <- plot_ly()
+    p     <- plotly::plot_ly()
     
     for (t in types) {
       sub <- df[df$type == t, ]
-      p <- add_trace(p,
+      p <- plotly::add_trace(p,
                      data   = sub,
                      x      = ~distance_km, y = ~avg_speed,
                      name   = t, type = "scatter", mode = "markers",
@@ -295,7 +299,7 @@ server <- function(input, output, session) {
       df_sorted <- df %>% arrange(distance_km)
       lo <- loess(avg_speed ~ distance_km, data = df_sorted, span = 0.6)
       df_sorted$trend <- predict(lo)
-      p <- add_trace(p,
+      p <- plotly::add_trace(p,
                      data = df_sorted,
                      x = ~distance_km, y = ~trend,
                      name = "Trend", type = "scatter", mode = "lines",
@@ -318,7 +322,7 @@ server <- function(input, output, session) {
       arrange(date)
     if (nrow(df) == 0) return(empty_plot("No elevation data"))
     
-    p <- plot_ly(df,
+    p <- plotly::plot_ly(df,
                  x = ~date, y = ~elevation_gain,
                  type = "scatter", mode = "markers",
                  marker = list(color = paste0(ORANGE, "66"), size = 5),
@@ -329,7 +333,7 @@ server <- function(input, output, session) {
       df$idx <- seq_len(nrow(df))
       lo <- loess(elevation_gain ~ idx, data = df, span = 0.4)
       df$trend <- predict(lo)
-      p <- add_trace(p, data = df[!is.na(df$trend),],
+      p <- plotly::add_trace(p, data = df[!is.na(df$trend),],
                      x = ~date, y = ~trend, name = "Trend",
                      type = "scatter", mode = "lines",
                      line = list(color = ORANGE, width = 2), hoverinfo = "skip")
@@ -345,7 +349,7 @@ server <- function(input, output, session) {
       filter(!is.na(moving_time_min), moving_time_min > 0)
     if (nrow(df) == 0) return(empty_plot("No duration data"))
     
-    plot_ly(df, x = ~moving_time_min,
+    plotly::plot_ly(df, x = ~moving_time_min,
             type = "histogram", nbinsx = 25,
             marker = list(color = ORANGE, opacity = 0.8,
                           line = list(color = "white", width = 0.5)),
@@ -361,7 +365,7 @@ server <- function(input, output, session) {
       arrange(date)
     if (nrow(df) == 0) return(empty_plot("No calorie data"))
     
-    p <- plot_ly(df,
+    p <- plotly::plot_ly(df,
                  x = ~date, y = ~calories,
                  type = "scatter", mode = "markers",
                  marker = list(color = paste0(ORANGE, "66"), size = 5),
@@ -372,7 +376,7 @@ server <- function(input, output, session) {
       df$idx <- seq_len(nrow(df))
       lo <- loess(calories ~ idx, data = df, span = 0.4)
       df$trend <- predict(lo)
-      p <- add_trace(p, data = df[!is.na(df$trend),],
+      p <- plotly::add_trace(p, data = df[!is.na(df$trend),],
                      x = ~date, y = ~trend,
                      type = "scatter", mode = "lines",
                      line = list(color = ORANGE, width = 2), hoverinfo = "skip",
@@ -389,7 +393,7 @@ server <- function(input, output, session) {
       filter(!is.na(distance_km), distance_km > 0)
     if (nrow(df) == 0) return(empty_plot())
     
-    plot_ly(df, x = ~distance_km,
+    plotly::plot_ly(df, x = ~distance_km,
             type = "histogram", nbinsx = 25,
             marker = list(color = ORANGE, opacity = 0.8,
                           line = list(color = "white", width = 0.5)),
@@ -410,8 +414,8 @@ server <- function(input, output, session) {
     df <- ins_pace_df()
     if (nrow(df) < 5) return(empty_plot("Not enough data — need at least 5 activities"))
     
-    plot_ly(source = "ins_pace") %>%
-      add_trace(data = df,
+    plotly::plot_ly(source = "ins_pace") %>%
+      plotly::add_trace(data = df,
                 x = ~date, y = ~avg_speed,
                 key = ~row_key,
                 type   = "scatter", mode = "markers",
@@ -602,5 +606,99 @@ server <- function(input, output, session) {
                  else "—")
     )
   })
+  # ---- Chatbot ----
+chat_history <- reactiveVal(list())
+
+output$chat_history <- renderUI({
+  msgs <- chat_history()
+  if (length(msgs) == 0) {
+    return(tags$div(
+      style = "text-align:center; color:#9ca3af; font-size:13px; padding:40px 0;",
+      icon("robot"), " Ask your coach anything about your training."
+    ))
+  }
+  items <- lapply(msgs, function(m) {
+    is_user <- m$role == "user"
+    tags$div(
+      class = if (is_user) "chat-row user-row" else "chat-row",
+      tags$div(
+        class = paste("chat-avatar", if (is_user) "avatar-user" else "avatar-assistant"),
+        if (is_user) "K" else icon("robot")
+      ),
+      tags$div(class = paste("chat-bubble", m$role), m$text)
+    )
+  })
+  tags$div(class = "chat-wrap", do.call(tagList, items))
+})
+
+observeEvent(input$chat_send, {
+  req(input$chat_prompt)
+  user_msg <- trimws(input$chat_prompt)
+  if (user_msg == "") return()
+
+  msgs <- chat_history()
+  msgs <- append(msgs, list(list(role = "user", text = user_msg)))
+  chat_history(msgs)
+  updateTextAreaInput(session, "chat_prompt", value = "")
+
+  showNotification("Thinking...", duration = NULL, id = "chat_thinking")
+
+  ctx <- {
+    df_ctx <- pf_filtered()
+    if (is.null(df_ctx) || nrow(df_ctx) == 0) {
+      "No activity data available."
+    } else {
+      n_acts     <- nrow(df_ctx)
+      total_dist <- round(sum(df_ctx$distance_km, na.rm = TRUE), 1)
+      avg_speed  <- if (all(is.na(df_ctx$avg_speed))) NA else round(mean(df_ctx$avg_speed, na.rm = TRUE), 1)
+      best_speed <- if (all(is.na(df_ctx$avg_speed))) NA else round(max(df_ctx$avg_speed, na.rm = TRUE), 1)
+      total_elev <- round(sum(df_ctx$elevation_gain, na.rm = TRUE), 1)
+      hr_min     <- if (all(is.na(df_ctx$max_hr))) NA else min(df_ctx$max_hr, na.rm = TRUE)
+      hr_max     <- if (all(is.na(df_ctx$max_hr))) NA else max(df_ctx$max_hr, na.rm = TRUE)
+      hr_avg     <- if (all(is.na(df_ctx$max_hr))) NA else round(mean(df_ctx$max_hr, na.rm = TRUE), 1)
+
+      recent <- df_ctx %>% arrange(desc(date)) %>% head(3)
+      recent_lines <- sapply(seq_len(nrow(recent)), function(i) {
+        r <- recent[i, ]
+        paste0(
+          format(r$date, "%d %b %Y"), " - ", r$type, " - ", round(r$distance_km, 1), " km",
+          if (!is.na(r$moving_time_min)) paste0(", ", r$moving_time_min, " min") else "",
+          if (!is.na(r$avg_speed))       paste0(", avg ", round(r$avg_speed, 1), " km/h") else "",
+          if (!is.na(r$max_hr))          paste0(", HRmax ", r$max_hr, " bpm") else "",
+          if (!is.na(r$elevation_gain))  paste0(", elev ", round(r$elevation_gain, 1), " m") else "",
+          if (!is.na(r$calories))        paste0(", ", round(r$calories), " kcal") else "",
+          if (!is.na(r$name))            paste0(" - ", r$name) else ""
+        )
+      })
+
+      paste0(
+        "Activities: ", n_acts, "; total ", total_dist, " km",
+        if (!is.na(avg_speed))  paste0("; avg speed ", avg_speed, " km/h") else "",
+        if (!is.na(best_speed)) paste0("; best avg ", best_speed, " km/h") else "",
+        "; elevation total ", total_elev, " m",
+        if (!is.na(hr_avg)) paste0("; HR (min/avg/max) ", hr_min, "/", hr_avg, "/", hr_max, " bpm") else "",
+        "\nRecent activities:\n", paste(recent_lines, collapse = "\n")
+      )
+    }
+  }
+
+  msgs_payload <- list(
+    list(role = "system",  content = "You are a helpful athletic performance coach. Answer concisely in Polish."),
+    list(role = "user",    content = paste0("Context (from Strava):\n", ctx)),
+    list(role = "user",    content = user_msg)
+  )
+
+  ans <- tryCatch({
+    trimws(bielik_chat(msgs_payload))
+  }, error = function(e) {
+    paste0("Błąd: ", e$message)
+  })
+
+  removeNotification("chat_thinking")
+  msgs <- chat_history()
+  msgs <- append(msgs, list(list(role = "assistant", text = ans)))
+  chat_history(msgs)
+  session$sendCustomMessage("scrollChatBottom", list())
+})
   
 }
