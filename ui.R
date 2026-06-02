@@ -310,6 +310,119 @@ hr { border-color:#f3f4f6 !important; }
 .overview-controls .col-sm-3 {
   margin-bottom: 12px;
 }
+
+/* ===== CUSTOM KPI CARDS ===== */
+.kpi-card {
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 155px;
+  display: flex;
+  align-items: center;
+}
+.kpi-card:hover {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+}
+.kpi-card.kpi-activities::before { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+.kpi-card.kpi-distance::before { background: linear-gradient(90deg, #10b981, #059669); }
+.kpi-card.kpi-calories::before { background: linear-gradient(90deg, #FC4C02, #ff7a42); }
+.kpi-card.kpi-elevation::before { background: linear-gradient(90deg, #8b5cf6, #6d28d9); }
+
+.kpi-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.kpi-icon {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  font-size: 32px;
+}
+.kpi-card.kpi-activities .kpi-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(29, 78, 216, 0.08));
+  color: #3b82f6;
+}
+.kpi-card.kpi-distance .kpi-icon {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
+  color: #10b981;
+}
+.kpi-card.kpi-calories .kpi-icon {
+  background: linear-gradient(135deg, rgba(252, 76, 2, 0.15), rgba(255, 122, 66, 0.08));
+  color: #FC4C02;
+}
+.kpi-card.kpi-elevation .kpi-icon {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(109, 40, 217, 0.08));
+  color: #8b5cf6;
+}
+
+.kpi-text {
+  flex: 1;
+}
+.kpi-value {
+  font-size: 28px;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.2;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.kpi-card.kpi-activities .kpi-value { 
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.kpi-card.kpi-distance .kpi-value { 
+  background: linear-gradient(135deg, #10b981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.kpi-card.kpi-calories .kpi-value { 
+  background: linear-gradient(135deg, #FC4C02, #ff7a42);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.kpi-card.kpi-elevation .kpi-value { 
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #9ca3af;
+  margin-top: 6px;
+  line-height: 1.2;
+}
 "
 
 ui <- dashboardPage(

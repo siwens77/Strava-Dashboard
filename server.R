@@ -79,6 +79,66 @@ server <- function(input, output, session) {
     df
   })
 
+  output$kpi_acts_custom <- renderUI({
+    n <- nrow(ov_data())
+    div(class = "col-sm-3",
+        div(class = "kpi-card kpi-activities",
+            div(class = "kpi-content",
+                div(class = "kpi-icon", icon("running")),
+                div(class = "kpi-text",
+                    p(class = "kpi-value", formatC(n, format = "d", big.mark = ",")),
+                    p(class = "kpi-label", "Total Activities")
+                )
+            )
+        )
+    )
+  })
+  
+  output$kpi_dist_custom <- renderUI({
+    d <- sum(ov_data()$distance_km, na.rm = TRUE)
+    div(class = "col-sm-3",
+        div(class = "kpi-card kpi-distance",
+            div(class = "kpi-content",
+                div(class = "kpi-icon", icon("road")),
+                div(class = "kpi-text",
+                    p(class = "kpi-value", paste0(formatC(round(d), format = "d", big.mark = ","), " km")),
+                    p(class = "kpi-label", "Total Distance")
+                )
+            )
+        )
+    )
+  })
+  
+  output$kpi_cals_custom <- renderUI({
+    c <- sum(ov_data()$calories, na.rm = TRUE)
+    div(class = "col-sm-3",
+        div(class = "kpi-card kpi-calories",
+            div(class = "kpi-content",
+                div(class = "kpi-icon", icon("fire")),
+                div(class = "kpi-text",
+                    p(class = "kpi-value", paste0(formatC(round(c), format = "d", big.mark = ","), " kcal")),
+                    p(class = "kpi-label", "Calories Burned")
+                )
+            )
+        )
+    )
+  })
+  
+  output$kpi_elev_custom <- renderUI({
+    e <- sum(ov_data()$elevation_gain, na.rm = TRUE)
+    div(class = "col-sm-3",
+        div(class = "kpi-card kpi-elevation",
+            div(class = "kpi-content",
+                div(class = "kpi-icon", icon("mountain")),
+                div(class = "kpi-text",
+                    p(class = "kpi-value", paste0(formatC(round(e), format = "d", big.mark = ","), " m")),
+                    p(class = "kpi-label", "Elevation Gained")
+                )
+            )
+        )
+    )
+  })
+
   output$kpi_acts <- renderValueBox({
     n <- nrow(ov_data())
     valueBox(
