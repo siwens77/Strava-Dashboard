@@ -111,7 +111,7 @@ hr.sidebar-hr { border-color: #2a2a35 !important; margin: 10px 18px !important; 
   box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
   border: 1px solid rgba(255,255,255,.4) !important;
   border-top: none !important;
-  overflow: visible;
+  overflow: visible !important;
   background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -142,7 +142,10 @@ hr.sidebar-hr { border-color: #2a2a35 !important; margin: 10px 18px !important; 
   margin-right: 8px;
   font-size: 14px;
 }
-.box-body { padding: 18px 20px !important; }
+.box-body { 
+  padding: 18px 20px !important; 
+  overflow: visible !important;
+}
 .value-box {
   border-radius: 16px !important;
   box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
@@ -256,6 +259,16 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
 .selectize-dropdown-content .option.selected,
 .selectize-dropdown-content .option.active {
   background: rgba(252,76,2,.09) !important; color: #FC4C02 !important;
+}
+.selectize-dropdown {
+  z-index: 1050 !important;
+  position: relative !important;
+}
+.selectize-input {
+  position: relative !important;
+}
+.col-sm-3 {
+  position: relative;
 }
 .checkbox label, .radio label { font-size: 12px !important; color: #4b5563 !important; }
 .irs-bar, .irs-bar-edge               { background: #FC4C02 !important; border-color: #FC4C02 !important; }
@@ -422,6 +435,24 @@ hr { border-color:#f3f4f6 !important; }
   color: #9ca3af;
   margin-top: 6px;
   line-height: 1.2;
+}
+
+.kpi-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  width: 100%;
+}
+.kpi-empty-state .kpi-empty-icon {
+  font-size: 28px;
+  opacity: 0.4;
+  margin-bottom: 4px;
 }
 "
 
@@ -679,14 +710,14 @@ ui <- dashboardPage(
                                                 tags$p(
                                                   "STRAVIZ is an R Shiny dashboard that transforms your exported ",
                                                   tags$strong("Strava activity data"), " into actionable intelligence. ",
-                                                  "Track training patterns, monitor performance trends, and celebrate ",
+                                                  "Track training patterns, monitor performance trends, contact personalized AI coach and celebrate ",
                                                   "personal achievements — all in one beautiful, interactive interface."
                                                 ),
                                                 tags$hr(),
                                                 tags$h3(icon("database"), " Data"),
                                                 tags$p(
                                                   "Place your ", tags$code("activities.csv"),
-                                                  " (Strava bulk export) in the app directory. ",
+                                                  " (Strava bulk export) in the app directory or run ", tags$code("scrapper.py"), " with your API keys in ", tags$code(".env"), " file. ",
                                                   "If no file is found, the dashboard runs on auto-generated ",
                                                   "demo data so you can explore all features immediately."
                                                 )
@@ -697,14 +728,16 @@ ui <- dashboardPage(
                                                 tags$h3(icon("question-circle"), " How to Use"),
                                                 tags$ol(
                                                   tags$li(tags$strong("Overview:"),
-                                                          " All-time KPIs, a GitHub-style activity calendar, monthly ",
-                                                          "distance bars, and an activity-type donut. Filter by year and sport."),
+                                                          " All-time statistics, a GitHub-style activity calendar, monthly ",
+                                                          "distance bars, and an activity donut chart. Filter by year and sport."),
                                                   tags$li(tags$strong("Performance:"),
-                                                          " Heart-rate trend (smoothed), speed-vs-distance scatter ",
-                                                          "(coloured by type), and monthly elevation chart."),
+                                                          " TBA"),
                                                   tags$li(tags$strong("Insights:"),
                                                           " Rolling average-speed trend, ",
-                                                          "personal records leaderboard, and ranked top-activities table.")
+                                                          "personal records leaderboard, and ranked top-activities table, all filter by year and sport."),
+                                                  tags$li(tags$strong("AI Chatbot:"),
+                                                          " A personal chatbot powered by your training data, ",
+                                                          "designed to act as your ultimate motivational coach (Powered by BielikAI).")
                                                 )
                                        )
                                 )

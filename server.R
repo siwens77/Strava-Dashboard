@@ -81,62 +81,106 @@ server <- function(input, output, session) {
 
   output$kpi_acts_custom <- renderUI({
     n <- nrow(ov_data())
-    div(class = "col-sm-3",
-        div(class = "kpi-card kpi-activities",
-            div(class = "kpi-content",
-                div(class = "kpi-icon", icon("running")),
-                div(class = "kpi-text",
-                    p(class = "kpi-value", formatC(n, format = "d", big.mark = ",")),
-                    p(class = "kpi-label", "Total Activities")
-                )
-            )
-        )
-    )
+    if (n == 0) {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-activities",
+              div(class = "kpi-empty-state",
+                  div(class = "kpi-empty-icon", icon("inbox")),
+                  p("No activities for selected filters", style = "margin: 0;")
+              )
+          )
+      )
+    } else {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-activities",
+              div(class = "kpi-content",
+                  div(class = "kpi-icon", icon("running")),
+                  div(class = "kpi-text",
+                      p(class = "kpi-value", formatC(n, format = "d", big.mark = ",")),
+                      p(class = "kpi-label", "Total Activities")
+                  )
+              )
+          )
+      )
+    }
   })
   
   output$kpi_dist_custom <- renderUI({
     d <- sum(ov_data()$distance_km, na.rm = TRUE)
-    div(class = "col-sm-3",
-        div(class = "kpi-card kpi-distance",
-            div(class = "kpi-content",
-                div(class = "kpi-icon", icon("road")),
-                div(class = "kpi-text",
-                    p(class = "kpi-value", paste0(formatC(round(d), format = "d", big.mark = ","), " km")),
-                    p(class = "kpi-label", "Total Distance")
-                )
-            )
-        )
-    )
+    if (nrow(ov_data()) == 0 || d == 0) {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-distance",
+              div(class = "kpi-empty-state",
+                  div(class = "kpi-empty-icon", icon("inbox")),
+                  p("No distance data available", style = "margin: 0;")
+              )
+          )
+      )
+    } else {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-distance",
+              div(class = "kpi-content",
+                  div(class = "kpi-icon", icon("road")),
+                  div(class = "kpi-text",
+                      p(class = "kpi-value", paste0(formatC(round(d), format = "d", big.mark = ","), " km")),
+                      p(class = "kpi-label", "Total Distance")
+                  )
+              )
+          )
+      )
+    }
   })
   
   output$kpi_cals_custom <- renderUI({
     c <- sum(ov_data()$calories, na.rm = TRUE)
-    div(class = "col-sm-3",
-        div(class = "kpi-card kpi-calories",
-            div(class = "kpi-content",
-                div(class = "kpi-icon", icon("fire")),
-                div(class = "kpi-text",
-                    p(class = "kpi-value", paste0(formatC(round(c), format = "d", big.mark = ","), " kcal")),
-                    p(class = "kpi-label", "Calories Burned")
-                )
-            )
-        )
-    )
+    if (nrow(ov_data()) == 0 || c == 0) {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-calories",
+              div(class = "kpi-empty-state",
+                  div(class = "kpi-empty-icon", icon("inbox")),
+                  p("No calories data available", style = "margin: 0;")
+              )
+          )
+      )
+    } else {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-calories",
+              div(class = "kpi-content",
+                  div(class = "kpi-icon", icon("fire")),
+                  div(class = "kpi-text",
+                      p(class = "kpi-value", paste0(formatC(round(c), format = "d", big.mark = ","), " kcal")),
+                      p(class = "kpi-label", "Calories Burned")
+                  )
+              )
+          )
+      )
+    }
   })
   
   output$kpi_elev_custom <- renderUI({
     e <- sum(ov_data()$elevation_gain, na.rm = TRUE)
-    div(class = "col-sm-3",
-        div(class = "kpi-card kpi-elevation",
-            div(class = "kpi-content",
-                div(class = "kpi-icon", icon("mountain")),
-                div(class = "kpi-text",
-                    p(class = "kpi-value", paste0(formatC(round(e), format = "d", big.mark = ","), " m")),
-                    p(class = "kpi-label", "Elevation Gained")
-                )
-            )
-        )
-    )
+    if (nrow(ov_data()) == 0 || e == 0) {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-elevation",
+              div(class = "kpi-empty-state",
+                  div(class = "kpi-empty-icon", icon("inbox")),
+                  p("No elevation data available", style = "margin: 0;")
+              )
+          )
+      )
+    } else {
+      div(class = "col-sm-3",
+          div(class = "kpi-card kpi-elevation",
+              div(class = "kpi-content",
+                  div(class = "kpi-icon", icon("mountain")),
+                  div(class = "kpi-text",
+                      p(class = "kpi-value", paste0(formatC(round(e), format = "d", big.mark = ","), " m")),
+                      p(class = "kpi-label", "Elevation Gained")
+                  )
+              )
+          )
+      )
+    }
   })
 
   output$kpi_acts <- renderValueBox({
@@ -242,32 +286,72 @@ server <- function(input, output, session) {
     
     metric <- if (!is.null(input$ov_metric)) input$ov_metric else "distance"
     
+    # Get year range from data
+    min_year <- min(year(df$date), na.rm = TRUE)
+    max_year <- max(year(df$date), na.rm = TRUE)
+    
+    # Create all months for the entire year range
+    all_months_seq <- seq(as.Date(paste0(min_year, "-01-01")), 
+                          as.Date(paste0(max_year, "-12-01")), 
+                          by = "month")
+    all_months <- data.frame(ym = all_months_seq)
+    
     if (metric == "elevation") {
       monthly <- df %>%
         mutate(ym = as.Date(paste0(format(date, "%Y-%m"), "-01"))) %>%
-        group_by(ym) %>%
-        summarise(val = sum(elevation_gain, na.rm = TRUE), .groups = "drop")
+        group_by(ym, type) %>%
+        summarise(elev = sum(elevation_gain, na.rm = TRUE), .groups = "drop")
       
-      p <- plotly::plot_ly(monthly,
-                   x = ~ym, y = ~val, type = "bar",
-                   marker = list(color = ORANGE, opacity = 0.85),
-                   hovertemplate = "%{x|%b %Y}<br>%{y:.0f} m<extra></extra>"
-      )
+      # Get all activity types from the data
+      all_types <- unique(df$type)
+      
+      # Create complete grid with all months and types
+      complete_monthly <- data.frame(
+        ym = rep(all_months$ym, times = length(all_types)),
+        type = rep(all_types, each = length(all_months$ym))
+      ) %>%
+        left_join(monthly, by = c("ym", "type")) %>%
+        mutate(elev = ifelse(is.na(elev), 0, elev))
+      
+      p <- plotly::plot_ly()
+      for (t in all_types) {
+        sub <- complete_monthly[complete_monthly$type == t, ]
+        p <- plotly::add_trace(p,
+                       x = sub$ym, y = sub$elev, name = t,
+                       type   = "bar",
+                       marker = list(color = activity_color(t)),
+                       hovertemplate = paste0("<b>", t, "</b><br>%{x|%b %Y}<br>%{y:.0f} m<extra></extra>")
+        )
+      }
       
       strava_layout(p, xlab = "", ylab = "meters") %>%
-        layout(xaxis = list(type = "date", tickformat = "%b '%y",
-                            tickfont = list(size = 10)))
+        layout(
+          barmode = "stack",
+          legend  = list(orientation = "h", y = -0.18, x = 0,
+                         font = list(size = 11)),
+          xaxis   = list(type = "date", tickformat = "%b '%y",
+                         tickfont = list(size = 10))
+        )
     } else {
       monthly <- df %>%
         mutate(ym = as.Date(paste0(format(date, "%Y-%m"), "-01"))) %>%
         group_by(ym, type) %>%
         summarise(dist = sum(distance_km, na.rm = TRUE), .groups = "drop")
       
-      types <- unique(monthly$type)
+      # Get all activity types from the data
+      all_types <- unique(df$type)
+      
+      # Create complete grid with all months and types
+      complete_monthly <- data.frame(
+        ym = rep(all_months$ym, times = length(all_types)),
+        type = rep(all_types, each = length(all_months$ym))
+      ) %>%
+        left_join(monthly, by = c("ym", "type")) %>%
+        mutate(dist = ifelse(is.na(dist), 0, dist))
       
       p <- plotly::plot_ly()
-      for (t in types) {
-        sub <- monthly[monthly$type == t, ]
+      for (t in all_types) {
+        sub <- complete_monthly[complete_monthly$type == t, ]
         p <- plotly::add_trace(p,
                        x = sub$ym, y = sub$dist, name = t,
                        type   = "bar",
