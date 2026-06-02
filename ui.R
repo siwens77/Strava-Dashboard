@@ -28,18 +28,26 @@ custom_css <- "
 
 
 /* ===== METRIC TOGGLE PILLS ===== */
-.metric-toggle { display:flex; gap:6px; }
+.metric-toggle { display:flex; gap:8px; }
 .metric-pill {
-  padding: 5px 14px; border-radius: 20px; font-size: 11px;
-  font-weight: 700; text-transform: uppercase; letter-spacing: .7px;
+  padding: 8px 16px; border-radius: 24px; font-size: 12px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
   border: 1.5px solid #e5e7eb; background: white; color: #9ca3af;
-  cursor: pointer; transition: all .18s; line-height: 1.4;
+  cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); line-height: 1.4;
   font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
 }
-.metric-pill:hover { border-color: #FC4C02; color: #FC4C02; }
+.metric-pill:hover { 
+  border-color: #FC4C02; 
+  color: #FC4C02;
+  box-shadow: 0 4px 12px rgba(252,76,2,.15);
+  transform: translateY(-2px);
+}
 .metric-pill.active {
-  background: #FC4C02; border-color: #FC4C02; color: white;
-  box-shadow: 0 2px 8px rgba(252,76,2,.30);
+  background: linear-gradient(135deg, #FC4C02, #ff7a42);
+  border-color: #FC4C02; 
+  color: white;
+  box-shadow: 0 6px 20px rgba(252,76,2,.35);
 }
 
 
@@ -54,7 +62,7 @@ body, .main-header, .main-sidebar, .content-wrapper, .box, .value-box, h1, h2, h
   font-weight: 900 !important;
 }
 
-body, .wrapper { background: #f0f2f5 !important; }
+body, .wrapper { background: linear-gradient(135deg, #f0f2f5 0%, #e8eaef 100%) !important; }
 
 /* Hide the sidebar toggle hamburger button */
 .sidebar-toggle { display: none !important; }
@@ -96,34 +104,107 @@ body, .wrapper { background: #f0f2f5 !important; }
   padding: 16px 20px 5px !important; font-weight: 700 !important;
 }
 hr.sidebar-hr { border-color: #2a2a35 !important; margin: 10px 18px !important; }
-.content-wrapper { background: #f0f2f5 !important; }
-.content          { padding: 14px 18px !important; }
+.content-wrapper { background: linear-gradient(135deg, #f0f2f5 0%, #e8eaef 100%) !important; }
+.content          { padding: 20px 24px !important; }
 .box {
-  border-radius: 13px !important;
-  box-shadow: 0 1px 5px rgba(0,0,0,.09) !important;
-  border: none !important; border-top: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
+  border: 1px solid rgba(255,255,255,.4) !important;
+  border-top: none !important;
   overflow: visible;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.box.box-orange { border-top: 3px solid #FC4C02 !important; }
+.box:hover {
+  box-shadow: 0 16px 40px rgba(0,0,0,.15) !important;
+  transform: translateY(-2px);
+}
+.box.box-orange { 
+  border-top: 4px solid #FC4C02 !important;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
 .box-header {
-  border-bottom: 1px solid #f5f5f5 !important;
-  padding: 13px 17px !important; border-radius: 13px 13px 0 0 !important;
+  border-bottom: 1px solid rgba(244, 244, 245, .6) !important;
+  padding: 16px 20px !important; 
+  border-radius: 16px 16px 0 0 !important;
+  background: transparent !important;
 }
 .box-title {
-  font-size: 12px !important; font-weight: 700 !important;
-  text-transform: uppercase; letter-spacing: .7px; color: #374151 !important;
+  font-size: 13px !important; 
+  font-weight: 700 !important;
+  text-transform: uppercase; 
+  letter-spacing: 1.2px; 
+  color: #1f2937 !important;
 }
-.box-title .fa, .box-title .fas { color: #FC4C02 !important; margin-right: 6px; }
-.box-body { padding: 14px 16px !important; }
+.box-title .fa, .box-title .fas { 
+  color: #FC4C02 !important; 
+  margin-right: 8px;
+  font-size: 14px;
+}
+.box-body { padding: 18px 20px !important; }
 .value-box {
-  border-radius: 13px !important;
-  box-shadow: 0 1px 5px rgba(0,0,0,.09) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12) !important;
   border: none !important;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%) !important;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255,255,255,.6);
 }
-.value-box .value-box-inner  { padding: 12px 15px !important; }
-.value-box p.value            { font-size: 22px !important; font-weight: 800 !important; }
-.value-box p.value-box-text   { font-size: 10px !important; text-transform: uppercase; letter-spacing: .9px; opacity: .85; }
-.value-box .value-box-icon    { font-size: 38px !important; width: 68px !important; }
+.value-box:hover {
+  box-shadow: 0 16px 40px rgba(0,0,0,.15) !important;
+  transform: translateY(-4px);
+}
+.value-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FC4C02, #ff7a42);
+  border-radius: 16px 16px 0 0;
+}
+.value-box .value-box-inner  { 
+  padding: 18px 20px !important; 
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
+.value-box p.value            { 
+  font-size: 28px !important; 
+  font-weight: 900 !important; 
+  background: linear-gradient(135deg, #FC4C02, #ff7a42);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 !important;
+}
+.value-box p.value-box-text   { 
+  font-size: 11px !important; 
+  text-transform: uppercase; 
+  letter-spacing: 1.2px; 
+  opacity: .7;
+  color: #6b7280 !important;
+  font-weight: 600;
+  margin: 4px 0 0 0 !important;
+}
+.value-box .value-box-icon    { 
+  font-size: 44px !important; 
+  width: 80px !important;
+  height: 80px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(252,76,2,.1), rgba(255,122,66,.08));
+  border-radius: 14px;
+  color: #FC4C02;
+  flex-shrink: 0;
+}
 table.dataTable { border-collapse: collapse !important; border-spacing: 0 !important; }
 table.dataTable thead th {
   background: #f9fafb !important; color: #6b7280 !important;
@@ -160,10 +241,18 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
   letter-spacing: .9px; color: #9ca3af; margin-bottom: 5px; font-weight: 700;
 }
 .form-control, .selectize-input {
-  border-radius: 8px !important; border-color: #e5e7eb !important;
-  font-size: 12px !important;
+  border-radius: 10px !important; 
+  border: 1.5px solid #e5e7eb !important;
+  font-size: 13px !important;
+  background: white !important;
+  padding: 10px 12px !important;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.04) !important;
 }
-.form-control:focus { border-color: #FC4C02 !important; box-shadow: 0 0 0 2px rgba(252,76,2,.15) !important; }
+.form-control:focus, .selectize-input.focus { 
+  border-color: #FC4C02 !important; 
+  box-shadow: 0 0 0 3px rgba(252,76,2,.1) !important; 
+}
 .selectize-dropdown-content .option.selected,
 .selectize-dropdown-content .option.active {
   background: rgba(252,76,2,.09) !important; color: #FC4C02 !important;
@@ -212,6 +301,14 @@ hr { border-color:#f3f4f6 !important; }
 .fa, .fas, .far, .fab {
   font-family: 'Font Awesome 5 Free' !important;
   font-weight: 900 !important;
+}
+
+/* ===== OVERVIEW PAGE ENHANCEMENTS ===== */
+.overview-controls {
+  margin-bottom: 20px;
+}
+.overview-controls .col-sm-3 {
+  margin-bottom: 12px;
 }
 "
 
@@ -285,6 +382,7 @@ ui <- dashboardPage(
               
               # Controls row
               fluidRow(
+                class = "overview-controls",
                 column(3,
                        selectInput("ov_year", NULL,
                                    choices  = c("All Years"),
@@ -298,10 +396,10 @@ ui <- dashboardPage(
               ),
               
               fluidRow(
-                valueBoxOutput("kpi_acts",  width = 3),
-                valueBoxOutput("kpi_dist",  width = 3),
-                valueBoxOutput("kpi_cals",  width = 3),
-                valueBoxOutput("kpi_elev",  width = 3)
+                uiOutput("kpi_acts_custom",  width = 3),
+                uiOutput("kpi_dist_custom",  width = 3),
+                uiOutput("kpi_cals_custom",  width = 3),
+                uiOutput("kpi_elev_custom",  width = 3)
               ),
               
               fluidRow(
