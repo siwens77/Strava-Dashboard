@@ -49,17 +49,17 @@ strava_layout <- function(p, xlab = "", ylab = "", ...) {
       plot_bgcolor  = "transparent",
       font = list(family = "Inter, sans-serif", color = GREY, size = 12),
       xaxis = list(
-        title      = list(text = xlab, font = list(size = 11, color = GREY)),
+        title      = list(text = xlab, font = list(size = 13, color = "#1f2937")),
         gridcolor  = "#f3f4f6",
         linecolor  = "#e5e7eb",
-        tickfont   = list(size = 11, color = "#9ca3af"),
+        tickfont   = list(size = 12, color = "#1f2937"),
         zeroline   = FALSE
       ),
       yaxis = list(
-        title      = list(text = ylab, font = list(size = 11, color = GREY)),
+        title      = list(text = ylab, font = list(size = 13, color = "#1f2937")),
         gridcolor  = "#f3f4f6",
         linecolor  = "transparent",
-        tickfont   = list(size = 11, color = "#9ca3af"),
+        tickfont   = list(size = 12, color = "#1f2937"),
         zeroline   = FALSE
       ),
       hoverlabel = list(

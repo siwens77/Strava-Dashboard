@@ -328,9 +328,11 @@ server <- function(input, output, session) {
         layout(
           barmode = "stack",
           legend  = list(orientation = "h", y = -0.18, x = 0,
-                         font = list(size = 11)),
+                         font = list(size = 13, color = "#1f2937")),
           xaxis   = list(type = "date", tickformat = "%b '%y",
-                         tickfont = list(size = 10))
+                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE),
+          yaxis   = list(title = list(font = list(size = 13, color = "#1f2937")),
+                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE)
         )
     } else {
       monthly <- df %>%
@@ -364,9 +366,11 @@ server <- function(input, output, session) {
         layout(
           barmode = "stack",
           legend  = list(orientation = "h", y = -0.18, x = 0,
-                         font = list(size = 11)),
+                         font = list(size = 13, color = "#1f2937")),
           xaxis   = list(type = "date", tickformat = "%b '%y",
-                         tickfont = list(size = 10))
+                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE),
+          yaxis   = list(title = list(font = list(size = 13, color = "#1f2937")),
+                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE)
         )
     }
   })
@@ -413,10 +417,10 @@ server <- function(input, output, session) {
                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>Max HR: %{y} bpm<extra></extra>"
       )
     
-    strava_layout(p, xlab = "", ylab = "bpm") %>%
-      layout(legend = list(orientation = "h", x = 0, y = -0.2,
-                           font = list(size = 11)),
-             xaxis  = list(type = "date"))
+    strava_layout(p, xlab = "Training Date", ylab = "Heart Rate (bpm)") %>%
+      layout(legend = list(orientation = "h", x = 0, y = -0.18,
+                           font = list(size = 13, color = "#1f2937")),
+              xaxis  = list(type = "date"))
   })
   
   output$pf_scatter <- renderPlotly({
@@ -452,41 +456,15 @@ server <- function(input, output, session) {
       )
     }
     
-    strava_layout(p, xlab = "Distance (km)", ylab = "Avg Speed (km/h)") %>%
+    strava_layout(p, xlab = "Distance (km)", ylab = "Average Speed (km/h)") %>%
       layout(
-        legend = list(orientation = "h", y = -0.25, x = 0, font = list(size = 10)),
-        margin = list(b = 60, l = 50)
-      )
+           showlegend = FALSE,
+           margin = list(b = 60, l = 50)
+         )
   })
   
   # ---- Elevation gain over time (scatter) ----
-  output$pf_elev_time <- renderPlotly({
-    df <- pf_filtered() %>%
-      filter(!is.na(elevation_gain), elevation_gain > 0) %>%
-      arrange(date)
-    if (nrow(df) == 0) return(empty_plot("No elevation data"))
-    
-    p <- plotly::plot_ly(df,
-                 x = ~date, y = ~elevation_gain,
-                 type = "scatter", mode = "markers",
-                 marker = list(color = paste0(ORANGE, "66"), size = 5),
-                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.0f} m<extra></extra>",
-                 showlegend = FALSE)
-    
-    if (nrow(df) >= 5) {
-      df$idx <- seq_len(nrow(df))
-      lo <- loess(elevation_gain ~ idx, data = df, span = 0.4)
-      df$trend <- predict(lo)
-      p <- plotly::add_trace(p, data = df[!is.na(df$trend),],
-                     x = ~date, y = ~trend, name = "Trend",
-                     type = "scatter", mode = "lines",
-                     line = list(color = ORANGE, width = 2), hoverinfo = "skip")
-    }
-    
-    strava_layout(p, xlab = "", ylab = "m") %>%
-      layout(xaxis = list(type = "date"), showlegend = FALSE)
-  })
-  
+  # Elevation over time graph removed  
   # ---- Duration distribution (histogram) ----
   output$pf_duration <- renderPlotly({
     df <- pf_filtered() %>%
@@ -527,25 +505,310 @@ server <- function(input, output, session) {
                      showlegend = FALSE)
     }
     
-    strava_layout(p, xlab = "", ylab = "kcal") %>%
-      layout(xaxis = list(type = "date"), showlegend = FALSE)
+    strava_layout(p, xlab = "Date", ylab = "Calories Burned (kcal)") %>%
+       layout(xaxis = list(type = "date"), showlegend = FALSE)
   })
   
-  # ---- Distance distribution (histogram) ----
-  output$pf_dist_hist <- renderPlotly({
+  # ---- Violin Plot: Effort Distribution by Sport ----
+  output$pf_violin <- renderPlotly({
     df <- pf_filtered() %>%
-      filter(!is.na(distance_km), distance_km > 0)
-    if (nrow(df) == 0) return(empty_plot())
+      filter(!is.na(relative_effort), relative_effort > 0)
+    if (nrow(df) == 0) return(empty_plot("No effort data"))
     
-    plotly::plot_ly(df, x = ~distance_km,
-            type = "histogram", nbinsx = 25,
-            marker = list(color = ORANGE, opacity = 0.8,
-                          line = list(color = "white", width = 0.5)),
-            hovertemplate = "%{x:.1f} km<br>%{y} activities<extra></extra>") %>%
-      strava_layout(xlab = "Distance (km)", ylab = "Count") %>%
-      layout(showlegend = FALSE, margin = list(l = 45, b = 45))
+    # Require at least 5 data points for a meaningful violin shape
+    type_counts <- table(df$type)
+    valid_types <- names(type_counts[type_counts >= 5])
+    df <- df %>% filter(type %in% valid_types)
+    if (nrow(df) == 0) return(empty_plot("Not enough data per sport (need 5+)"))
+    
+    p <- plot_ly()
+    for (sport in valid_types) {
+      sport_data <- df[df$type == sport, ]
+      med_val <- round(median(sport_data$relative_effort))
+      min_val <- round(min(sport_data$relative_effort))
+      max_val <- round(max(sport_data$relative_effort))
+      
+      # Violin shape (no hover)
+      p <- p %>% add_trace(
+        y = sport_data$relative_effort,
+        type = "violin",
+        name = sport,
+        box = list(visible = TRUE),
+        meanline = list(visible = FALSE),
+        points = FALSE,
+        fillcolor = paste0(activity_color(sport), "33"),
+        line = list(color = activity_color(sport)),
+        hoverinfo = "skip",
+        showlegend = FALSE
+      )
+      
+      # Invisible markers at min/median/max for hover info
+      p <- p %>% add_trace(
+        x = rep(sport, 3),
+        y = c(min_val, med_val, max_val),
+        type = "scatter", mode = "markers",
+        marker = list(size = 10, color = activity_color(sport), opacity = 0.01),
+        text = c(
+          paste0(sport, "\nMin: ", min_val),
+          paste0(sport, "\nMedian: ", med_val),
+          paste0(sport, "\nMax: ", max_val)
+        ),
+        hoverinfo = "text",
+        showlegend = FALSE
+      )
+    }
+    
+    p %>%
+      strava_layout(xlab = "", ylab = "Relative Effort") %>%
+      layout(
+        showlegend = FALSE,
+        margin = list(l = 50, b = 50, t = 20)
+      )
   })
   
+  # ---- Dead Time: Elapsed vs Moving Time ----
+  output$pf_deadtime <- renderPlotly({
+    df <- pf_filtered() %>%
+      filter(!is.na(elapsed_time_s), !is.na(moving_time_s),
+             elapsed_time_s > 0, moving_time_s > 0) %>%
+      mutate(
+        elapsed_min = round(elapsed_time_s / 60, 1),
+        moving_min  = round(moving_time_s / 60, 1),
+        dead_min    = round((elapsed_time_s - moving_time_s) / 60, 1),
+        pct_moving  = round(100 * moving_time_s / elapsed_time_s, 1)
+      )
+    if (nrow(df) == 0) return(empty_plot("No time data"))
+    
+    max_val <- max(c(df$elapsed_min, df$moving_min), na.rm = TRUE)
+    
+    # Build one trace per type to avoid color-grouping hover bugs
+    p <- plot_ly()
+    for (sport in unique(df$type)) {
+      sport_df <- df[df$type == sport, ]
+      p <- p %>% add_trace(
+        x = sport_df$elapsed_min,
+        y = sport_df$moving_min,
+        type = "scatter", mode = "markers",
+        name = sport,
+        marker = list(
+          size = 8, opacity = 0.7,
+          color = activity_color(sport),
+          line = list(color = "white", width = 1)
+        ),
+        text = paste0(
+          sport_df$name,
+          "\nElapsed: ", round(sport_df$elapsed_min), " min",
+          "\nMoving: ", round(sport_df$moving_min), " min",
+          "\nRest: ", round(sport_df$dead_min), " min",
+          "\nActive: ", sport_df$pct_moving, "%"
+        ),
+        hoverinfo = "text"
+      )
+    }
+    
+    # Diagonal reference line (perfect = no stops)
+    p <- p %>% add_trace(
+      x = c(0, max_val * 1.1), y = c(0, max_val * 1.1),
+      type = "scatter", mode = "lines",
+      line = list(color = "#d1d5db", width = 1.5, dash = "dash"),
+      hoverinfo = "skip", showlegend = FALSE
+    )
+    
+    p %>%
+      strava_layout(xlab = "Total Elapsed (min)", ylab = "Moving Time (min)") %>%
+      layout(
+        margin = list(l = 50, b = 50, t = 20),
+        legend = list(
+          orientation = "h", x = 0, y = -0.22,
+          font = list(size = 10)
+        ),
+        annotations = list(
+          list(
+            x = max_val * 0.85, y = max_val * 0.92,
+            text = "No breaks line",
+            showarrow = FALSE,
+            font = list(size = 9, color = "#9ca3af", family = "Inter")
+          )
+        )
+      )
+  })
+  
+  # ---- Radar Chart: Sport Profile ----
+  output$pf_radar <- renderPlotly({
+    df <- pf_filtered() %>%
+      filter(!is.na(avg_speed))
+    if (nrow(df) == 0) return(empty_plot("No data for radar"))
+    
+    # Calculate means per type, normalize to 0–1
+    metrics <- c("elevation_gain", "avg_speed", "distance_km",
+                 "relative_effort", "calories", "max_hr")
+    labels  <- c("Elevation", "Speed", "Distance",
+                 "Effort", "Calories", "Max HR")
+    
+    # Get types with enough data
+    type_counts <- table(df$type)
+    valid_types <- names(type_counts[type_counts >= 2])
+    if (length(valid_types) == 0) return(empty_plot("Not enough data per sport"))
+    
+    # Compute means
+    agg <- df %>%
+      filter(type %in% valid_types) %>%
+      group_by(type) %>%
+      summarise(
+        avg_speed       = mean(avg_speed, na.rm = TRUE),
+        max_hr          = mean(max_hr, na.rm = TRUE),
+        calories        = mean(calories, na.rm = TRUE),
+        elevation_gain  = mean(elevation_gain, na.rm = TRUE),
+        relative_effort = mean(relative_effort, na.rm = TRUE),
+        distance_km     = mean(distance_km, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    # Normalize each metric 0–100 for comparison
+    for (m in metrics) {
+      rng <- range(agg[[m]], na.rm = TRUE)
+      if (rng[2] - rng[1] > 0) {
+        agg[[m]] <- round(100 * (agg[[m]] - rng[1]) / (rng[2] - rng[1]))
+      } else {
+        agg[[m]] <- 50
+      }
+    }
+    
+    p <- plot_ly(type = "scatterpolar")
+    
+    for (sport in valid_types) {
+      vals <- unlist(agg[agg$type == sport, metrics], use.names = FALSE)
+      vals <- as.numeric(vals)
+      vals <- c(vals, vals[1])  # close the polygon
+      theta <- c(labels, labels[1])
+      
+      p <- add_trace(p,
+        r = vals, theta = theta,
+        type = "scatterpolar",
+        fill = "toself",
+        fillcolor = paste0(activity_color(sport), "22"),
+        line = list(color = activity_color(sport), width = 2),
+        marker = list(size = 4, color = activity_color(sport)),
+        name = sport,
+        hovertemplate = paste0(
+          "<b>", sport, "</b><br>",
+          "%{theta}: %{r:.0f}/100<extra></extra>"
+        )
+      )
+    }
+    
+    p %>% layout(
+      polar = list(
+        radialaxis = list(
+          visible = TRUE, range = c(0, 105),
+          showticklabels = FALSE,
+          gridcolor = "#e5e7eb",
+          linecolor = "transparent"
+        ),
+        angularaxis = list(
+          gridcolor = "#e5e7eb",
+          linecolor = "#e5e7eb",
+          tickfont = list(size = 10, color = "#1f2937", family = "Inter")
+        ),
+        bgcolor = "transparent"
+      ),
+      paper_bgcolor = "transparent",
+      plot_bgcolor  = "transparent",
+      font = list(family = "Inter, sans-serif", color = GREY),
+      hoverlabel = list(
+        bgcolor = DARK, bordercolor = ORANGE,
+        font = list(color = "white", size = 12, family = "Inter")
+      ),
+      legend = list(
+        orientation = "h", x = 0, y = -0.15,
+        font = list(size = 10, family = "Inter")
+      ),
+      margin = list(l = 50, r = 50, t = 30, b = 50),
+      showlegend = TRUE
+    ) %>%
+      plotly::config(displayModeBar = FALSE)
+  })
+  
+  # ---- Efficiency Quadrant: Effort vs Speed ----
+  output$pf_quadrant <- renderPlotly({
+    df <- pf_filtered() %>%
+      filter(!is.na(relative_effort), relative_effort > 0,
+             !is.na(avg_speed), avg_speed > 0)
+    if (nrow(df) == 0) return(empty_plot("No effort/speed data"))
+    
+    med_speed  <- median(df$avg_speed, na.rm = TRUE)
+    med_effort <- median(df$relative_effort, na.rm = TRUE)
+    
+    p <- plot_ly()
+    for (sport in unique(df$type)) {
+      sport_df <- df[df$type == sport, ]
+      p <- p %>% add_trace(
+        x = sport_df$avg_speed,
+        y = sport_df$relative_effort,
+        type = "scatter", mode = "markers",
+        name = sport,
+        marker = list(
+          size = 9, opacity = 0.75,
+          color = activity_color(sport),
+          line = list(color = "white", width = 1)
+        ),
+        text = paste0(
+          sport_df$name,
+          "\nSpeed: ", round(sport_df$avg_speed, 2), " m/s",
+          "\nEffort: ", round(sport_df$relative_effort)
+        ),
+        hoverinfo = "text"
+      )
+    }
+    
+    speed_range <- range(df$avg_speed, na.rm = TRUE)
+    effort_range <- range(df$relative_effort, na.rm = TRUE)
+    
+    # Quadrant labels
+    annotations <- list(
+      list(x = speed_range[2], y = effort_range[2],
+           text = "Hard + Fast", showarrow = FALSE,
+           font = list(size = 9, color = "#ef4444", family = "Inter"),
+           xanchor = "right", yanchor = "top", opacity = 0.6),
+      list(x = speed_range[1], y = effort_range[2],
+           text = "Hard + Slow", showarrow = FALSE,
+           font = list(size = 9, color = "#f59e0b", family = "Inter"),
+           xanchor = "left", yanchor = "top", opacity = 0.6),
+      list(x = speed_range[2], y = effort_range[1],
+           text = "Easy + Fast", showarrow = FALSE,
+           font = list(size = 9, color = "#10b981", family = "Inter"),
+           xanchor = "right", yanchor = "bottom", opacity = 0.6),
+      list(x = speed_range[1], y = effort_range[1],
+           text = "Easy + Slow", showarrow = FALSE,
+           font = list(size = 9, color = "#6b7280", family = "Inter"),
+           xanchor = "left", yanchor = "bottom", opacity = 0.6)
+    )
+    
+    # Median lines (quadrant dividers)
+    shapes <- list(
+      list(type = "line",
+           x0 = med_speed, x1 = med_speed,
+           y0 = effort_range[1] * 0.9, y1 = effort_range[2] * 1.05,
+           line = list(color = "#d1d5db", width = 1, dash = "dot")),
+      list(type = "line",
+           x0 = speed_range[1] * 0.95, x1 = speed_range[2] * 1.05,
+           y0 = med_effort, y1 = med_effort,
+           line = list(color = "#d1d5db", width = 1, dash = "dot"))
+    )
+    
+    strava_layout(p, xlab = "Avg Speed (m/s)", ylab = "Relative Effort") %>%
+      layout(
+        annotations = annotations,
+        shapes = shapes,
+        margin = list(l = 50, b = 50, t = 20),
+        legend = list(
+          orientation = "h", x = 0, y = -0.22,
+          font = list(size = 10)
+        )
+      )
+  })
+  
+
   # Shared reactive: the pace dataframe used by both chart and click handler
   ins_pace_df <- reactive({
     ins_filtered() %>%

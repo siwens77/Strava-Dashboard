@@ -262,7 +262,7 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
 }
 .selectize-dropdown {
   z-index: 1050 !important;
-  position: relative !important;
+  position: absolute !important;
 }
 .selectize-input {
   position: relative !important;
@@ -271,9 +271,48 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
   position: relative;
 }
 .checkbox label, .radio label { font-size: 12px !important; color: #4b5563 !important; }
-.irs-bar, .irs-bar-edge               { background: #FC4C02 !important; border-color: #FC4C02 !important; }
-.irs-from, .irs-to, .irs-single       { background: #FC4C02 !important; }
-.irs-handle                           { border-color: #FC4C02 !important; }
+/* ===== MODERN SLIM RANGE SLIDER ===== */
+.irs { height: 60px !important; }
+.irs-line {
+  height: 4px !important; top: 16px !important;
+  background: #e5e7eb !important; border: none !important;
+  border-radius: 4px !important; overflow: hidden;
+}
+.irs-bar, .irs-bar-edge {
+  height: 4px !important; top: 16px !important;
+  background: linear-gradient(90deg, #FC4C02, #ff7a42) !important;
+  border: none !important; border-radius: 4px !important;
+}
+.irs-handle {
+  width: 16px !important; height: 16px !important;
+  top: 10px !important;
+  background: #fff !important;
+  border: 2px solid #FC4C02 !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(252,76,2,.25) !important;
+  cursor: pointer !important;
+  transition: box-shadow .2s, transform .2s;
+}
+.irs-handle:hover, .irs-handle.state_hover {
+  box-shadow: 0 3px 10px rgba(252,76,2,.4) !important;
+  transform: scale(1.15);
+}
+.irs-from, .irs-to, .irs-single {
+  background: #FC4C02 !important;
+  font-size: 10px !important; padding: 2px 6px !important;
+  border-radius: 6px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important; letter-spacing: .3px;
+  top: -4px !important;
+}
+.irs-min, .irs-max {
+  font-size: 9px !important; color: #9ca3af !important;
+  background: transparent !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.irs-grid-text { font-size: 10px !important; color: #4b5563 !important; font-family: 'Inter', sans-serif !important; }
+.slider-col { margin-left: 0.2cm; }
+.irs-grid-pol { background: #9ca3af !important; }
 .about-hero {
   background: linear-gradient(135deg,#FC4C02 0%,#ff7a42 100%);
   color:white; border-radius:16px; padding:38px;
@@ -577,51 +616,37 @@ ui <- dashboardPage(
       ),
       
       tabItem(tabName = "performance",
-              
-              fluidRow(
-                column(3,
-                       box(
-                         title  = tagList(icon("sliders-h"), "Controls"),
-                         width  = NULL, class = "box-orange",
-                         
-                         tags$span(class = "filter-label", "Sport"),
-                         selectInput("pf_type", NULL,
-                                     choices = c("All", "Run","Ride","Swim","Hike","Walk","Workout"),
-                                     selected = "All", width = "100%"),
-                         
-                         tags$span(class = "filter-label", "Date Range"),
-                         uiOutput("pf_date_ui")
-                       ),
-                       
-                ),
-                
-                column(9,
-                       fluidRow(
-                         box(title = tagList(icon("heartbeat"), "Heart Rate Over Time"),
-                             width = 6, class = "box-orange",
-                             plotlyOutput("pf_hr", height = "170px")),
-                         box(title = tagList(icon("tachometer-alt"), "Speed vs Distance"),
-                             width = 6, class = "box-orange",
-                             plotlyOutput("pf_scatter", height = "170px"))
-                       ),
-                       fluidRow(
-                         box(title = tagList(icon("mountain"), "Elevation Gain Over Time"),
-                             width = 6, class = "box-orange",
-                             plotlyOutput("pf_elev_time", height = "170px")),
-                         box(title = tagList(icon("clock"), "Activity Duration Distribution"),
-                             width = 6, class = "box-orange",
-                             plotlyOutput("pf_duration", height = "170px"))
-                       ),
+               
+               # Controls row similar to Overview
+               fluidRow(
+                 class = "overview-controls",
+                 column(3,
+                        tags$span(class = "filter-label", "Sport"),
+                        selectInput("pf_type", NULL,
+                                    choices = c("All", "Run","Ride","Swim","Hike","Walk","Workout"),
+                                    selected = "All", width = "100%")),
+                 column(8, class = "slider-col",
+                        tags$span(class = "filter-label", "Date Range"),
+                        uiOutput("pf_date_ui"))
+               ),
+               
+               # Graphs arranged in pairs
+               fluidRow(
+                 box(title = tagList(icon("music"), "Effort Distribution by Sport"),
+                     width = 6, class = "box-orange",
+                     plotlyOutput("pf_violin", height = "300px")),
+                 box(title = tagList(icon("crosshairs"), "Efficiency Quadrant"),
+                     width = 6, class = "box-orange",
+                     plotlyOutput("pf_quadrant", height = "300px"))
+               ),
                 fluidRow(
-                         box(title = tagList(icon("fire"), "Calories Over Time"),
-                             width = 6, class = "box-orange",
-                             plotlyOutput("pf_cals", height = "170px")),
-                         box(title = tagList(icon("chart-bar"), "Distance Distribution"),
-                             width = 6, class = "box-orange",
-                             plotlyOutput("pf_dist_hist", height = "170px"))
+                  box(title = tagList(icon("bullseye"), "Sport Profile Radar"),
+                      width = 6, class = "box-orange",
+                      plotlyOutput("pf_radar", height = "320px")),
+                  box(title = tagList(icon("fire"), "Calories Over Time"),
+                      width = 6, class = "box-orange",
+                      plotlyOutput("pf_cals", height = "320px"))
                 )
-                )
-              )
       ),
       
       tabItem(tabName = "insights",
