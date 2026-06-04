@@ -821,17 +821,45 @@ server <- function(input, output, session) {
     df <- ins_pace_df()
     if (nrow(df) < 5) return(empty_plot("Not enough data — need at least 5 activities"))
     
+    # Determine x-axis range: full year if a specific year is selected
+    sel_year <- input$ins_year
+    if (!is.null(sel_year) && sel_year != "All") {
+      yr <- as.integer(sel_year)
+      x_range <- list(paste0(yr, "-01-01"), paste0(yr, "-12-31"))
+      x_dtick <- "M1"
+      x_format <- "%b '%y"
+    } else {
+      x_range <- NULL
+      x_dtick <- "M2"
+      x_format <- "%b '%y"
+    }
+    
     plotly::plot_ly(source = "ins_pace") %>%
       plotly::add_trace(data = df,
                 x = ~date, y = ~avg_speed,
                 key = ~row_key,
                 type   = "scatter", mode = "markers",
-                marker = list(color = paste0(ORANGE, "55"), size = 6),
+                marker = list(color = paste0(ORANGE, "77"), size = 9,
+                              line = list(color = ORANGE, width = 1)),
                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.1f} km/h<extra></extra>",
                 showlegend = FALSE
       ) %>%
-      strava_layout(xlab = "", ylab = "km/h") %>%
-      layout(xaxis = list(type = "date"))
+      strava_layout(xlab = "", ylab = "") %>%
+      layout(
+        xaxis = list(
+          type = "date",
+          range = x_range,
+          tickformat = x_format,
+          tickfont = list(size = 14, color = "#1f2937", family = "Inter"),
+          dtick = x_dtick,
+          title = list(text = "Date", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20)
+        ),
+        yaxis = list(
+          tickfont = list(size = 14, color = "#1f2937", family = "Inter"),
+          title = list(text = "Avg Speed (km/h)", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20)
+        ),
+        margin = list(l = 75, r = 20, t = 20, b = 65)
+      )
   })
   
   # Observer: table row click → highlight that point on the chart via proxy
@@ -856,8 +884,9 @@ server <- function(input, output, session) {
         y          = list(hit$avg_speed[1]),
         type       = "scatter",
         mode       = "markers",
-        marker     = list(color = ORANGE, size = 13,
-                          line = list(color = "white", width = 2)),
+        marker     = list(color = "#FF2D00", size = 18, opacity = 1,
+                          line = list(color = "white", width = 3),
+                          symbol = "circle"),
         hovertemplate = paste0("<b>", hit$date[1], "</b><br>",
                                round(hit$avg_speed[1], 1), " km/h<extra></extra>"),
         showlegend = FALSE
@@ -975,42 +1004,71 @@ server <- function(input, output, session) {
     
     runs  <- df[df$type == "Run",  ]
     rides <- df[df$type == "Ride", ]
+    walks <- df[df$type == "Walk", ]
+    workouts <- df[df$type == "Workout", ]
     
-    record_row <- function(label, value) {
+    record_row <- function(icon_emoji, label, value) {
       tags$div(
         style = "display:flex; justify-content:space-between; align-items:center;
-                 padding:7px 0; border-bottom:1px solid #f3f4f6; font-size:12px;",
-        tags$span(style = "color:#6b7280;", label),
-        tags$span(style = "font-weight:700; color:#FC4C02;", value)
+                 padding:14px 10px; border-bottom:1px solid #f3f4f6;",
+        tags$div(
+          style = "display:flex; align-items:center; gap:10px;",
+          tags$span(style = "font-size:20px; line-height:1;", icon_emoji),
+          tags$span(style = "color:#4b5563; font-size:13px; font-weight:500;", label)
+        ),
+        tags$span(style = "font-weight:800; color:#FC4C02; font-size:15px;
+                          background:rgba(252,76,2,0.08); padding:4px 10px;
+                          border-radius:8px;", value)
       )
     }
     
+    # Longest duration
+    longest_dur <- if (nrow(df) > 0) {
+      max_s <- max(df$moving_time_s, na.rm = TRUE)
+      fmt_time(max_s)
+    } else "—"
+    
+    # Highest relative effort
+    max_effort <- if (nrow(df) > 0 && any(!is.na(df$relative_effort)))
+      round(max(df$relative_effort, na.rm = TRUE)) else NA
+    
+    # Most active month
+    most_active_month <- if (nrow(df) > 0) {
+      month_counts <- table(format(df$date, "%b %Y"))
+      names(which.max(month_counts))
+    } else "—"
+    
+    # Total distance
+    total_dist <- if (nrow(df) > 0) 
+      paste0(formatC(round(sum(df$distance_km, na.rm = TRUE), 1), format = "f", digits = 1), " km") else "—"
+    
     tags$div(
-      record_row("🏃 Longest Run",
+      style = "padding: 4px 0;",
+      record_row("\U0001F3C3", "Longest Run",
                  if (nrow(runs) > 0)
                    fmt_dist(max(runs$distance_km, na.rm = TRUE))
                  else "—"),
-      record_row("🏃 Fastest Run (avg)",
-                 if (nrow(runs) > 0)
-                   paste0(round(max(runs$avg_speed, na.rm = TRUE), 1), " km/h")
-                 else "—"),
-      record_row("🚴 Longest Ride",
+      record_row("\U0001F6B4", "Longest Ride",
                  if (nrow(rides) > 0)
                    fmt_dist(max(rides$distance_km, na.rm = TRUE))
                  else "—"),
-      record_row("🚴 Most Elevation",
+      record_row("\U000026F0", "Most Elevation",
                  if (nrow(df) > 0)
                    paste0(max(df$elevation_gain, na.rm = TRUE), " m")
                  else "—"),
-      record_row("🔥 Most Calories",
+      record_row("\U0001F525", "Most Calories",
                  if (nrow(df) > 0)
                    paste0(formatC(max(df$calories, na.rm = TRUE),
                                   format = "d", big.mark = ","), " kcal")
                  else "—"),
-      record_row("💓 Peak Heart Rate",
+      record_row("\U0001F493", "Peak Heart Rate",
                  if (nrow(df) > 0 && any(!is.na(df$max_hr)))
                    paste0(max(df$max_hr, na.rm = TRUE), " bpm")
-                 else "—")
+                 else "—"),
+      record_row("\U0001F550", "Longest Activity",
+                 longest_dur),
+      record_row("\U0001F4C5", "Most Active Month",
+                 most_active_month)
     )
   })
   # ---- Chatbot ----

@@ -26,6 +26,50 @@ custom_css <- "
 .avatar-user      { background: #FC4C02; color: white; }
 .avatar-assistant { background: #e5e7eb; color: #374151; }
 
+/* ===== CHAT INPUT AREA ===== */
+.chat-input-area {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-input-area .form-group { margin-bottom: 0 !important; }
+.chat-input-area textarea {
+  border-radius: 14px !important;
+  border: 1.5px solid #e5e7eb !important;
+  padding: 14px 16px !important;
+  font-size: 14px !important;
+  resize: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.chat-input-area textarea:focus {
+  border-color: #FC4C02 !important;
+  box-shadow: 0 0 0 3px rgba(252,76,2,.1) !important;
+}
+.chat-send-btn {
+  width: 100%;
+  padding: 12px 24px !important;
+  border: none !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #FC4C02, #ff7a42) !important;
+  color: white !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 14px rgba(252,76,2,.25) !important;
+}
+.chat-send-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(252,76,2,.4) !important;
+  background: linear-gradient(135deg, #e54400, #FC4C02) !important;
+}
+.chat-send-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(252,76,2,.3) !important;
+}
 
 /* ===== METRIC TOGGLE PILLS ===== */
 .metric-toggle { display:flex; gap:8px; }
@@ -651,48 +695,38 @@ ui <- dashboardPage(
       
       tabItem(tabName = "insights",
               
+              # Controls row (horizontal, matching other tabs)
               fluidRow(
-                
+                class = "overview-controls",
                 column(3,
-                       box(
-                         title  = tagList(icon("sliders-h"), "Controls"),
-                         width  = NULL, class = "box-orange",
-                         
-                         tags$span(class = "filter-label", "Year"),
-                         selectInput("ins_year", NULL,
-                                     choices = c("All"), selected = "All", width = "100%"),
-                         
-                         tags$span(class = "filter-label", "Sport"),
-                         selectInput("ins_type", NULL,
-                                     choices = c("All","Run","Ride","Swim","Hike","Walk","Workout"),
-                                     selected = "All", width = "100%")
-                       ),
-                       
-                       box(
-                         title  = tagList(icon("trophy"), "Personal Records"),
-                         width  = NULL, class = "box-orange",
-                         uiOutput("personal_records")
-                       )
-                ),
-                
-                column(9,
-                       fluidRow(
-                         box(
-                           title = tagList(icon("chart-line"), "Average Speed Trend"),
-                           width = 12, class = "box-orange",
-                           plotlyOutput("ins_pace", height = "200px")
-                         )
-                       ),
-                       fluidRow(
-                         box(
-                           title = tagList(icon("medal"), "Top Activities"),
-                           width = 12, class = "box-orange",
-                           uiOutput("ins_hover_info"),
-                           div(id = "ins_table_wrap",
-                               DTOutput("ins_top_table")
-                           )
-                         )
-                       )
+                       tags$span(class = "filter-label", "Year"),
+                       selectInput("ins_year", NULL,
+                                   choices = c("All"), selected = "All", width = "100%")),
+                column(3,
+                       tags$span(class = "filter-label", "Sport"),
+                       selectInput("ins_type", NULL,
+                                   choices = c("All","Run","Ride","Swim","Hike","Walk","Workout"),
+                                   selected = "All", width = "100%"))
+              ),
+              
+              # Average Speed Trend + Personal Records side by side
+              fluidRow(style = "display:flex; flex-wrap:wrap; align-items:stretch;",
+                box(title = tagList(icon("chart-line"), "Average Speed Trend"),
+                    width = 8, class = "box-orange",
+                    plotlyOutput("ins_pace", height = "420px")),
+                box(title = tagList(icon("trophy"), "Personal Records"),
+                    width = 4, class = "box-orange",
+                    uiOutput("personal_records"))
+              ),
+              
+              # Top Activities table (full width)
+              fluidRow(
+                box(title = tagList(icon("medal"), "Top Activities"),
+                    width = 12, class = "box-orange",
+                    uiOutput("ins_hover_info"),
+                    div(id = "ins_table_wrap",
+                        DTOutput("ins_top_table")
+                    )
                 )
               )
       ),
@@ -708,9 +742,9 @@ ui <- dashboardPage(
                           div(id = "chat_history_wrap_conv", style = "white-space: pre-wrap; max-height: 560px; overflow: auto; padding: 12px; background: #ffffff; border-radius: 6px;",
                               uiOutput("chat_history")
                           ),
-                          div(style = "margin-top: 10px;",
-                              textAreaInput("chat_prompt", NULL, placeholder = "Write a message...", width = "100%", height = "90px"),
-                              actionButton("chat_send", "Send", class = "btn btn-primary", style = "margin-top: 8px; width: 100%;")
+                          div(class = "chat-input-area",
+                              textAreaInput("chat_prompt", NULL, placeholder = "Write a message...", width = "100%", height = "80px"),
+                              actionButton("chat_send", tagList(icon("paper-plane"), " Send"), class = "chat-send-btn")
                           )
                         )
                  )
