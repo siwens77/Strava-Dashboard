@@ -524,48 +524,57 @@ server <- function(input, output, session) {
     p <- plot_ly()
     for (sport in valid_types) {
       sport_data <- df[df$type == sport, ]
-      
-      sport_data <- df[df$type == sport, ]
-      med_val <- round(median(sport_data$relative_effort))
-      min_val <- round(min(sport_data$relative_effort))
-      max_val <- round(max(sport_data$relative_effort))
-      
-      # Violin shape (no hover)
+
+      med_val  <- round(median(sport_data$relative_effort))
+      min_val  <- round(min(sport_data$relative_effort))
+      max_val  <- round(max(sport_data$relative_effort))
+      mean_val <- round(mean(sport_data$relative_effort))
+      q1_val   <- round(quantile(sport_data$relative_effort, 0.25))
+      q3_val   <- round(quantile(sport_data$relative_effort, 0.75))
+      n_val    <- nrow(sport_data)
+
+      ht <- paste0(
+        "<b>", sport, "</b><br>",
+        "n: ", n_val, "<br>",
+        "Min: ", min_val, "<br>",
+        "Q1: ", q1_val, "<br>",
+        "Median: ", med_val, "<br>",
+        "Mean: ", mean_val, "<br>",
+        "Q3: ", q3_val, "<br>",
+        "Max: ", max_val,
+        "<extra></extra>"
+      )
+
       p <- p %>% add_trace(
-        y = sport_data$relative_effort,
-        type = "violin",
-        name = sport,
-        box = list(visible = TRUE),
-        meanline = list(visible = FALSE),
-        points = FALSE,
-        fillcolor = paste0(activity_color(sport), "33"),
-        line = list(color = activity_color(sport)),
-        hoverinfo = "skip",
+        x          = rep(sport, nrow(sport_data)),
+        y          = sport_data$relative_effort,
+        type       = "violin",
+        name       = sport,
+        box        = list(visible = TRUE),
+        meanline   = list(visible = FALSE),
+        points     = FALSE,
+        fillcolor  = paste0(activity_color(sport), "33"),
+        line       = list(color = activity_color(sport)),
+        hoverinfo  = "skip",
         showlegend = FALSE
       )
-      
-      # Invisible markers at min/median/max for hover info
+
       p <- p %>% add_trace(
-        x = rep(sport, 3),
-        y = c(min_val, med_val, max_val),
-        type = "scatter", mode = "markers",
-        marker = list(size = 10, color = activity_color(sport), opacity = 0.01),
-        text = c(
-          paste0(sport, "\nMin: ", min_val),
-          paste0(sport, "\nMedian: ", med_val),
-          paste0(sport, "\nMax: ", max_val)
-        ),
-        hoverinfo = "text",
-        showlegend = FALSE
+        x             = rep(sport, 5),
+        y             = c(min_val, q1_val, med_val, q3_val, max_val),
+        type          = "scatter", mode = "markers",
+        marker        = list(size = 14, color = "transparent",
+                             line = list(color = "transparent")),
+        hovertemplate = ht,
+        showlegend    = FALSE
       )
     }
-    
+
     p %>%
       strava_layout(xlab = "", ylab = "Relative Effort") %>%
       layout(
         showlegend = FALSE,
-        margin = list(l = 50, b = 50, t = 20),
-        violinmode = "group"
+        margin     = list(l = 50, b = 50, t = 20)
       )
   })
   
