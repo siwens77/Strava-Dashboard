@@ -118,10 +118,9 @@ body, .wrapper { background: linear-gradient(135deg, #f0f2f5 0%, #e8eaef 100%) !
 .skin-black .main-header .navbar     { background: #FC4C02 !important; border: none !important; }
 .navbar-custom-menu > .nav > li > a  { color: white !important; }
 .logo-wrap { display:flex; align-items:center; gap:9px; }
-.logo-mono {
-  width:34px; height:34px; background:rgba(255,255,255,0.22);
-  border-radius:9px; display:flex; align-items:center; justify-content:center;
-  font-size:17px; font-weight:900; color:white; flex-shrink:0;
+.logo-img {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  object-fit: cover;
 }
 .logo-name { color:white; font-weight:900; font-size:17px; letter-spacing:3px; }
 .skin-black .main-sidebar,
@@ -363,11 +362,10 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
   text-align:center; margin-bottom:18px;
   box-shadow:0 4px 22px rgba(252,76,2,.28);
 }
-.about-hero-mono {
-  width:78px; height:78px; background:rgba(255,255,255,.2);
-  border-radius:20px; font-size:38px; font-weight:900; color:white;
-  display:flex; align-items:center; justify-content:center;
-  margin:0 auto 14px; backdrop-filter:blur(10px);
+.about-logo-img {
+  width: 78px; height: 78px; border-radius: 20px;
+  margin: 0 auto 14px; display: block;
+  object-fit: cover;
 }
 .about-hero h1  { font-size:50px; font-weight:900; letter-spacing:5px; margin:0 0 7px; }
 .about-hero p   { font-size:15px; opacity:.9; margin:0; }
@@ -541,14 +539,14 @@ hr { border-color:#f3f4f6 !important; }
 
 ui <- dashboardPage(
   skin  = "black",
-  title = "Kstrava",
+  title = "ProjectK",
   
   dashboardHeader(
     titleWidth = 220,
     title = tags$div(
       class = "logo-wrap",
-      tags$div(class = "logo-mono", "KV"),
-      tags$span(class = "logo-name", "Kstrava")
+      tags$img(src = "logo.png", class = "logo-img"),
+      tags$span(class = "logo-name", "ProjectK")
     )
   ),
   
@@ -757,21 +755,21 @@ ui <- dashboardPage(
                 column(12,
                        
                        tags$div(class = "about-hero",
-                                tags$div(class = "about-hero-mono", "SV"),
-                                tags$h1("STRAVIZ"),
-                                tags$p("Your Personal Athletic Intelligence Dashboard")
-                       ),
+                                 tags$img(src = "logo.png", class = "about-logo-img"),
+                                 tags$h1("ProjectK"),
+                                 tags$p("Your Personal Athletic Intelligence Dashboard")
+                        ),
                        
                        fluidRow(style = "display: flex; flex-wrap: wrap;",
                                 column(6,
-                                       tags$div(class = "about-card",
-                                                tags$h3(icon("bullseye"), " About STRAVIZ"),
-                                                tags$p(
-                                                  "STRAVIZ is an R Shiny dashboard that transforms your exported ",
-                                                  tags$strong("Strava activity data"), " into actionable intelligence. ",
-                                                  "Track training patterns, monitor performance trends, contact personalized AI coach and celebrate ",
-                                                  "personal achievements — all in one beautiful, interactive interface."
-                                                ),
+                                        tags$div(class = "about-card",
+                                                 tags$h3(icon("bullseye"), " About ProjectK"),
+                                                 tags$p(
+                                                   "ProjectK is an R Shiny dashboard that transforms your exported ",
+                                                   tags$strong("Strava activity data"), " into actionable intelligence. ",
+                                                   "Track training patterns, monitor performance trends, contact personalized AI coach and celebrate ",
+                                                   "personal achievements — all in one beautiful, interactive interface."
+                                                   ),
                                                 tags$hr(),
                                                 tags$h3(icon("database"), " Data"),
                                                 tags$p(
@@ -789,8 +787,8 @@ ui <- dashboardPage(
                                                   tags$li(tags$strong("Overview:"),
                                                           " All-time statistics, a GitHub-style activity calendar, monthly ",
                                                           "distance bars, and an activity donut chart. Filter by year and sport."),
-                                                  tags$li(tags$strong("Performance:"),
-                                                          " TBA"),
+                                                   tags$li(tags$strong("Performance:"),
+                                                           " Violin plot of relative effort distribution by sport, Efficiency Quadrant showing effort vs speed with quadrant labels, Sport Profile Radar with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and Calories Over Time scatter with trend line. Filterable by sport and date range."),
                                                   tags$li(tags$strong("Insights:"),
                                                           " Rolling average-speed trend, ",
                                                           "personal records leaderboard, and ranked top-activities table, all filter by year and sport."),

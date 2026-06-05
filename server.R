@@ -524,6 +524,8 @@ server <- function(input, output, session) {
     p <- plot_ly()
     for (sport in valid_types) {
       sport_data <- df[df$type == sport, ]
+      
+      sport_data <- df[df$type == sport, ]
       med_val <- round(median(sport_data$relative_effort))
       min_val <- round(min(sport_data$relative_effort))
       max_val <- round(max(sport_data$relative_effort))
@@ -562,7 +564,8 @@ server <- function(input, output, session) {
       strava_layout(xlab = "", ylab = "Relative Effort") %>%
       layout(
         showlegend = FALSE,
-        margin = list(l = 50, b = 50, t = 20)
+        margin = list(l = 50, b = 50, t = 20),
+        violinmode = "group"
       )
   })
   
@@ -708,7 +711,7 @@ server <- function(input, output, session) {
         angularaxis = list(
           gridcolor = "#e5e7eb",
           linecolor = "#e5e7eb",
-          tickfont = list(size = 10, color = "#1f2937", family = "Inter")
+          tickfont = list(size = 13, color = "#1f2937", family = "Inter", weight = "600")
         ),
         bgcolor = "transparent"
       ),
@@ -768,20 +771,20 @@ server <- function(input, output, session) {
     annotations <- list(
       list(x = speed_range[2], y = effort_range[2],
            text = "Hard + Fast", showarrow = FALSE,
-           font = list(size = 9, color = "#ef4444", family = "Inter"),
-           xanchor = "right", yanchor = "top", opacity = 0.6),
+           font = list(size = 11, color = "#ef4444", family = "Inter"),
+           xanchor = "right", yanchor = "top"),
       list(x = speed_range[1], y = effort_range[2],
            text = "Hard + Slow", showarrow = FALSE,
-           font = list(size = 9, color = "#f59e0b", family = "Inter"),
-           xanchor = "left", yanchor = "top", opacity = 0.6),
+           font = list(size = 11, color = "#f59e0b", family = "Inter"),
+           xanchor = "left", yanchor = "top"),
       list(x = speed_range[2], y = effort_range[1],
            text = "Easy + Fast", showarrow = FALSE,
-           font = list(size = 9, color = "#10b981", family = "Inter"),
-           xanchor = "right", yanchor = "bottom", opacity = 0.6),
+           font = list(size = 11, color = "#10b981", family = "Inter"),
+           xanchor = "right", yanchor = "bottom"),
       list(x = speed_range[1], y = effort_range[1],
            text = "Easy + Slow", showarrow = FALSE,
-           font = list(size = 9, color = "#6b7280", family = "Inter"),
-           xanchor = "left", yanchor = "bottom", opacity = 0.6)
+           font = list(size = 11, color = "#6b7280", family = "Inter"),
+           xanchor = "left", yanchor = "bottom")
     )
     
     # Median lines (quadrant dividers)
@@ -800,11 +803,12 @@ server <- function(input, output, session) {
       layout(
         annotations = annotations,
         shapes = shapes,
-        margin = list(l = 50, b = 50, t = 20),
+        margin = list(l = 50, b = 70, t = 20),
         legend = list(
-          orientation = "h", x = 0, y = -0.22,
-          font = list(size = 10)
-        )
+          orientation = "h", x = 0, y = -0.28,
+          font = list(size = 13)
+        ),
+        xaxis = list(title = list(standoff = 5))
       )
   })
   
@@ -1073,6 +1077,7 @@ server <- function(input, output, session) {
   })
   # ---- Chatbot ----
 chat_history <- reactiveVal(list())
+chat_request_times <- reactiveVal(list())
 
 output$chat_history <- renderUI({
   msgs <- chat_history()
@@ -1100,6 +1105,15 @@ observeEvent(input$chat_send, {
   req(input$chat_prompt)
   user_msg <- trimws(input$chat_prompt)
   if (user_msg == "") return()
+
+  now <- as.numeric(Sys.time())
+  times <- chat_request_times()
+  times <- times[times > now - 60]
+  if (length(times) >= 5) {
+    showNotification("Rate limit exceeded: max 5 requests per minute", type = "error", duration = 5)
+    return()
+  }
+  chat_request_times(c(times, now))
 
   msgs <- chat_history()
   msgs <- append(msgs, list(list(role = "user", text = user_msg)))
