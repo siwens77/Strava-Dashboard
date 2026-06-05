@@ -51,9 +51,28 @@ jobs:
 
       - name: Deploy to shinyapps.io
         env:
+          env:
           SHINYAPPS_ACCOUNT: ${{ secrets.SHINYAPPS_ACCOUNT }}
           SHINYAPPS_TOKEN: ${{ secrets.SHINYAPPS_TOKEN }}
           SHINYAPPS_SECRET: ${{ secrets.SHINYAPPS_SECRET }}
+          
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+          PCSS_API_KEY: ${{ secrets.PCSS_API_KEY }}
+          
+          PCSS_BASE_URL: "https://llm.hpc.psnc.pl/v1"
+          PCSS_MODEL: "bielik_11b"
+          R_PORT: "3838"
         run: |
+          echo "STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID}" > .Renviron
+          echo "STRAVA_CLIENT_SECRET=${STRAVA_CLIENT_SECRET}" >> .Renviron
+          echo "STRAVA_REFRESH_TOKEN=${STRAVA_REFRESH_TOKEN}" >> .Renviron
+          echo "PCSS_API_KEY=${PCSS_API_KEY}" >> .Renviron
+          echo "PCSS_BASE_URL=${PCSS_BASE_URL}" >> .Renviron
+          echo "PCSS_MODEL=${PCSS_MODEL}" >> .Renviron
+          echo "R_PORT=${R_PORT}" >> .Renviron
+          
           Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('SHINYAPPS_ACCOUNT'), token=Sys.getenv('SHINYAPPS_TOKEN'), secret=Sys.getenv('SHINYAPPS_SECRET'))"
           Rscript -e "rsconnect::deployApp(appDir = '.', forceUpdate = TRUE)"
+          
