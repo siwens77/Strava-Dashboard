@@ -1,0 +1,10 @@
+name: strava-dashboard
+title:
+username: krzychunowak
+account: krzychunowak
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17471132
+bundleId: 12086574
+url: https://krzychunowak.shinyapps.io/strava-dashboard/
+version: 1

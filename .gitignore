@@ -2,3 +2,5 @@
 .env
 opencode.json
 .Rhistory
+.Rproj.user
+.Renviron
