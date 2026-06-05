@@ -1,4 +1,4 @@
-# ProjectK
+# ProjectK - Strava Interactive Dashboard
 
 [![R Version](https://img.shields.io/badge/R-%3E%3D%204.0-blue)](https://www.r-project.org/)
 [![Shiny](https://img.shields.io/badge/Shiny-1.8+-orange)](https://shiny.rstudio.com/)
@@ -17,7 +17,7 @@
 - **Monthly Trends**: Stacked bars by sport (distance/elevation toggle)
 - **Sport Split**: Donut chart with activity type distribution
 
-### 📈 Performance
+### Performance
 - **Effort Distribution**: Violin plots of relative effort by sport
 - **Efficiency Quadrant**: Effort vs Speed with quadrant labels (Hard+Fast, Easy+Slow, etc.)
 - **Sport Profile Radar**: 6 normalized metrics (Elevation, Speed, Distance, Effort, Calories, Max HR)
@@ -42,7 +42,7 @@
 
 ### Option 1: Local R (Recommended)
 ```r
-# 1. Generate demo data (or use your own activities.csv)
+# 1. Generate demo data (or use your own activities.csv or use default activities.csv)
 Rscript generate_data.R 1000
 
 # 2. Launch app
@@ -64,14 +64,14 @@ shiny::runApp()
 
 ---
 
-## 📦 Data Setup
+## Data Setup
 
 | Method | Description |
 |--------|-------------|
 | **Auto-sync (CI/CD)** | GitHub Action runs `scrapper.py` every 6h + on push (`.github/workflows/sync_strava.yaml`) |
 | **Manual fetch** | Run `python scrapper.py` with `.env` configured |
 | **Strava export** | Place bulk export `activities.csv` in app root |
-| **Demo data** | `Rscript generate_data.R [n_rows]` |
+| **Demo data** | `Rscript generate_data.R` |
 
 ### Strava API Credentials
 1. Create app at [developers.strava.com](https://developers.strava.com/)
@@ -118,7 +118,7 @@ PCSS_MODEL=bielik_11b
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── ui.R                 # Dashboard UI: tabs, layout, custom CSS
@@ -154,27 +154,7 @@ Install Python deps: `pip install -r requirements.txt`
 
 ---
 
-## Deployment
-
-### GitHub Actions (Auto-sync)
-- **Trigger**: Push to main, every 6 hours, manual dispatch
-- **Secrets needed**: `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `STRAVA_REFRESH_TOKEN`
-- **Output**: Commits updated `activities.csv`
-
-### shinyapps.io / RStudio Connect / Shiny Server
-- Set environment variables in platform dashboard
-- Ensure `activities.csv` is present or generated on startup
-
----
-
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
----
-
-## Acknowledgments
-
-- **Strava API** for activity data
-- **PCSS/PSNC** for Bielik LLM hosting
-- **R Shiny** ecosystem for the dashboard framework
