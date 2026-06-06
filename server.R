@@ -349,7 +349,7 @@ server <- function(input, output, session) {
           xaxis   = list(type = "date", tickformat = "%b '%y",
                          tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE),
           yaxis   = list(title = list(font = list(size = 13, color = "#1f2937")),
-                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE)
+                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
         )
     } else {
       monthly <- df %>%
@@ -385,7 +385,7 @@ server <- function(input, output, session) {
           xaxis   = list(type = "date", tickformat = "%b '%y",
                          tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE),
           yaxis   = list(title = list(font = list(size = 13, color = "#1f2937")),
-                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE)
+                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
         )
     }
   })
@@ -528,11 +528,14 @@ server <- function(input, output, session) {
                 hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>4-Week Avg: %{y:.0f} kcal/week<extra></extra>",
                 showlegend = TRUE)
     
-    strava_layout(p, xlab = "Week", ylab = "Calories (kcal)") %>%
+    strava_layout(p, xlab = "", ylab = "Calories (kcal)") %>%
        layout(
-         xaxis = list(type = "date", dtick = "M6", tickformat = "%b '%y"),
-         yaxis = list(rangemode = "tozero"),
-         legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
+         xaxis = list(type = "date", showticklabels = FALSE, showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+         yaxis = list(rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+         legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937")),
+         annotations = list(
+           list(x = 0.5, y = -0.15, text = "Weeks", showarrow = FALSE, xref = "paper", yref = "paper", font = list(size = 14, color = "#1f2937", family = "Inter, sans-serif"))
+         )
        )
   })
   
@@ -599,6 +602,8 @@ server <- function(input, output, session) {
       strava_layout(xlab = "", ylab = "Max HR (bpm)") %>%
       layout(
         showlegend = FALSE,
+        xaxis      = list(showgrid = FALSE, showline = TRUE),
+        yaxis      = list(showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
         margin     = list(l = 50, b = 50, t = 20)
       )
   })
@@ -829,7 +834,8 @@ server <- function(input, output, session) {
       layout(
         annotations = annotations,
         shapes = shapes,
-        yaxis = list(rangemode = "tozero"),
+        xaxis = list(showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+        yaxis = list(rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
         legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
       )
   })
@@ -838,7 +844,8 @@ server <- function(input, output, session) {
   ins_pace_df <- reactive({
     ins_filtered() %>%
       filter(!is.na(avg_speed), avg_speed > 0) %>%
-      mutate(avg_speed = avg_speed * 3.6) %>%
+      mutate(avg_speed = avg_speed * 3.6,
+             avg_speed_jitter = jitter(avg_speed, amount = 0.3)) %>%
       arrange(date) %>%
       mutate(row_key = row_number())
   })
@@ -861,12 +868,13 @@ server <- function(input, output, session) {
     
     plotly::plot_ly(source = "ins_pace") %>%
       plotly::add_trace(data = df,
-                x = ~date, y = ~avg_speed,
+                x = ~date, y = ~avg_speed_jitter,
+                customdata = ~avg_speed,
                 key = ~row_key,
                 type   = "scatter", mode = "markers",
                 marker = list(color = activity_color(df$type), size = 9, opacity = 0.75,
                               line = list(color = "white", width = 1)),
-                hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.1f} km/h<extra></extra>",
+                hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{customdata:.1f} km/h<extra></extra>",
                 showlegend = FALSE
       ) %>%
       strava_layout(xlab = "", ylab = "") %>%
@@ -877,12 +885,14 @@ server <- function(input, output, session) {
           tickformat = x_format,
           tickfont = list(size = 14, color = "#1f2937", family = "Inter"),
           dtick = x_dtick,
-          title = list(text = "Date", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20)
+          title = list(text = "Date", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20),
+          gridcolor = "#f1f5f9", showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
         yaxis = list(
           rangemode = "tozero",
           tickfont = list(size = 14, color = "#1f2937", family = "Inter"),
-          title = list(text = "Avg Speed (km/h)", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20)
+          title = list(text = "Avg Speed (km/h)", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20),
+          gridcolor = "#f1f5f9", showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
         margin = list(l = 75, r = 20, t = 20, b = 65)
       )
