@@ -655,7 +655,7 @@ ui <- dashboardPage(
                 box(
                   title = tagList(icon("chart-pie"), "Activity Split"),
                   width = 4, class = "box-orange",
-                  plotlyOutput("ov_donut",     height = "260px")
+                  plotlyOutput("ov_donut",     height = "276px")
                 )
               )
       ),
