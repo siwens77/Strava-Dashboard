@@ -568,6 +568,7 @@ ui <- dashboardPage(
   dashboardBody(
     
     tags$head(
+      tags$link(rel = "shortcut icon", href = "logo.png"),
       tags$style(HTML(custom_css)),
       tags$script(HTML("
         // Metric pill toggle
