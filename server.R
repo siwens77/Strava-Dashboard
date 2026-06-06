@@ -508,8 +508,7 @@ server <- function(input, output, session) {
     strava_layout(p, xlab = "Date", ylab = "Calories Burned (kcal)") %>%
        layout(
          xaxis = list(type = "date"),
-         showlegend = TRUE,
-         legend = list(orientation = "h", x = 0, y = -0.18, font = list(size = 13, color = "#1f2937"))
+         legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
        )
   })
   
@@ -752,6 +751,10 @@ server <- function(input, output, session) {
              !is.na(avg_speed), avg_speed > 0)
     if (nrow(df) == 0) return(empty_plot("No effort/speed data"))
     
+    # Add jitter to spread out overlapping points
+    df$jittered_speed <- jitter(df$avg_speed, amount = 0.2)
+    df$jittered_effort <- jitter(df$relative_effort, amount = 7.5)
+    
     med_speed  <- median(df$avg_speed, na.rm = TRUE)
     med_effort <- median(df$relative_effort, na.rm = TRUE)
     
@@ -759,8 +762,8 @@ server <- function(input, output, session) {
     for (sport in unique(df$type)) {
       sport_df <- df[df$type == sport, ]
       p <- p %>% add_trace(
-        x = sport_df$avg_speed,
-        y = sport_df$relative_effort,
+        x = sport_df$jittered_speed,
+        y = sport_df$jittered_effort,
         type = "scatter", mode = "markers",
         name = sport,
         marker = list(
@@ -816,7 +819,7 @@ server <- function(input, output, session) {
       layout(
         annotations = annotations,
         shapes = shapes,
-        legend = list(orientation = "h", x = 0, y = -0.18, font = list(size = 13, color = "#1f2937"))
+        legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
       )
   })
   
