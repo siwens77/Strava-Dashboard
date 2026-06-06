@@ -88,7 +88,7 @@ def save_to_csv(activities):
                 'max_speed': act.get('max_speed', ''),
                 'avg_speed': act.get('average_speed', ''),
                 'elevation_gain': act.get('total_elevation_gain', ''),
-                'elevation_loss': 0, # Calculate if available
+                'elevation_loss': 0,
                 'elevation_low': act.get('elev_low', ''),
                 'elevation_high': act.get('elev_high', ''),
                 'max_grade': act.get('max_grade', ''),

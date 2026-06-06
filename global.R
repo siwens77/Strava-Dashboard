@@ -8,7 +8,7 @@ library(fontawesome)
 library(httr)
 library(jsonlite)
 
-# Load .env if present (simple loader) ----
+
 if (file.exists('.env')) {
   lines <- readLines('.env', warn = FALSE)
   lines <- lines[grepl('=', lines) & !grepl('^\\s*#', lines)]
@@ -127,7 +127,7 @@ fmt_time <- function(s) {
   if (h > 0) sprintf("%dh %02dm", h, m) else sprintf("%dm", m)
 }
 
-# LLM (Bielik / PCSS) integration helper
+
 PCSS_BASE_URL <- Sys.getenv("PCSS_BASE_URL", "https://llm.hpc.psnc.pl/v1")
 PCSS_API_KEY  <- Sys.getenv("PCSS_API_KEY", "")
 

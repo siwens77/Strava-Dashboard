@@ -1,7 +1,7 @@
 custom_css <- "
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-/* ===== CHAT BUBBLES ===== */
+
 .chat-wrap { display: flex; flex-direction: column; gap: 12px; padding: 4px 0; }
 .chat-row { display: flex; align-items: flex-end; gap: 8px; }
 .user-row  { flex-direction: row-reverse; }
@@ -26,7 +26,7 @@ custom_css <- "
 .avatar-user      { background: #FC4C02; color: white; }
 .avatar-assistant { background: #e5e7eb; color: #374151; }
 
-/* ===== CHAT INPUT AREA ===== */
+
 .chat-input-area {
   margin-top: 12px;
   display: flex;
@@ -71,7 +71,7 @@ custom_css <- "
   box-shadow: 0 2px 8px rgba(252,76,2,.3) !important;
 }
 
-/* ===== METRIC TOGGLE PILLS ===== */
+
 .metric-toggle { display:flex; gap:8px; }
 .metric-pill {
   padding: 8px 16px; border-radius: 24px; font-size: 12px;
@@ -95,12 +95,12 @@ custom_css <- "
 }
 
 
-/* ===== BASE ===== */
+
 body, .main-header, .main-sidebar, .content-wrapper, .box, .value-box, h1, h2, h3, p, span { 
   font-family: 'Inter', -apple-system, sans-serif !important; 
 }
 
-/* Specifically PROTECT the icons from being overwritten */
+
 .fa, .fas, .far, .fab {
   font-family: 'Font Awesome 5 Free' !important;
   font-weight: 900 !important;
@@ -108,7 +108,7 @@ body, .main-header, .main-sidebar, .content-wrapper, .box, .value-box, h1, h2, h
 
 body, .wrapper { background: linear-gradient(135deg, #f0f2f5 0%, #e8eaef 100%) !important; }
 
-/* Hide the sidebar toggle hamburger button */
+
 .sidebar-toggle { display: none !important; }
 
 .skin-black .main-header .logo {
@@ -314,7 +314,7 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
   position: relative;
 }
 .checkbox label, .radio label { font-size: 12px !important; color: #4b5563 !important; }
-/* ===== MODERN SLIM RANGE SLIDER ===== */
+
 .irs { height: 60px !important; }
 .irs-line {
   height: 4px !important; top: 16px !important;
@@ -372,7 +372,7 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
 .about-card {
   background:white; border-radius:13px; padding:22px;
   margin-bottom:18px; box-shadow:0 1px 5px rgba(0,0,0,.08);
-  height: calc(100% - 18px); /* Height stretching adjustment */
+  height: calc(100% - 18px);
 }
 .about-card h3  { font-size:14px; font-weight:700; color:#111827; margin:0 0 11px; }
 .about-card h3 .fa { color:#FC4C02; margin-right:7px; }
@@ -397,7 +397,7 @@ hr { border-color:#f3f4f6 !important; }
   font-weight: 900 !important;
 }
 
-/* ===== OVERVIEW PAGE ENHANCEMENTS ===== */
+
 .overview-controls {
   margin-bottom: 20px;
 }
@@ -405,7 +405,7 @@ hr { border-color:#f3f4f6 !important; }
   margin-bottom: 12px;
 }
 
-/* ===== CUSTOM KPI CARDS ===== */
+
 .kpi-card {
   border-radius: 16px;
   padding: 22px;
@@ -571,14 +571,14 @@ ui <- dashboardPage(
       tags$link(rel = "shortcut icon", href = "logo.png"),
       tags$style(HTML(custom_css)),
       tags$script(HTML("
-        // Metric pill toggle
+
         $(document).on('click', '.metric-pill', function() {
           $('.metric-pill').removeClass('active');
           $(this).addClass('active');
           Shiny.setInputValue('ov_metric', $(this).data('val'), {priority: 'event'});
         });
 
-        // Highlight a row in ins_top_table without re-rendering
+
         Shiny.addCustomMessageHandler('highlightInsRow', function(msg) {
           var table = $('#ins_top_table table').DataTable();
           if (!table) return;
@@ -594,7 +594,7 @@ ui <- dashboardPage(
           }
         });
 
-        // Auto-scroll chat container to bottom when new assistant response arrives
+
         Shiny.addCustomMessageHandler('scrollChatBottom', function(msg) {
           var el = document.getElementById('chat_history_wrap_conv');
           if (!el) return;
@@ -606,7 +606,7 @@ ui <- dashboardPage(
     tabItems(
       tabItem(tabName = "overview",
               
-              # Controls row
+
               fluidRow(
                 class = "overview-controls",
                 column(3,
@@ -660,7 +660,7 @@ ui <- dashboardPage(
       
       tabItem(tabName = "performance",
                
-               # Controls row similar to Overview
+
                fluidRow(
                  class = "overview-controls",
                  column(3,
@@ -673,7 +673,7 @@ ui <- dashboardPage(
                         uiOutput("pf_date_ui"))
                ),
                
-               # Graphs arranged in pairs
+
                fluidRow(
                  box(title = tagList(icon("heartbeat"), "Max HR Distribution by Sport"),
                      width = 6, class = "box-orange",
@@ -694,7 +694,7 @@ ui <- dashboardPage(
       
       tabItem(tabName = "insights",
               
-              # Controls row (horizontal, matching other tabs)
+
               fluidRow(
                 class = "overview-controls",
                 column(3,
@@ -708,7 +708,7 @@ ui <- dashboardPage(
                                    selected = "All", width = "100%"))
               ),
               
-              # Average Speed Trend + Personal Records side by side
+
               fluidRow(style = "display:flex; flex-wrap:wrap; align-items:stretch;",
                 box(title = tagList(icon("chart-line"), "Average Speed Trend"),
                     width = 8, class = "box-orange",
@@ -718,7 +718,7 @@ ui <- dashboardPage(
                     uiOutput("personal_records"))
               ),
               
-              # Top Activities table (full width)
+
               fluidRow(
                 box(title = tagList(icon("medal"), "Top Activities"),
                     width = 12, class = "box-orange",
@@ -768,7 +768,7 @@ ui <- dashboardPage(
                                                  tags$p(
                                                    "ProjectK is an R Shiny dashboard that transforms your exported ",
                                                    tags$strong("Strava activity data"), " into actionable intelligence. ",
-                                                   "Track training patterns, monitor performance trends, contact personalized AI coach and celebrate ",
+                                                   "Track training patterns, monitor performance trends, contact a personalized AI coach and celebrate ",
                                                    "personal achievements — all in one beautiful, interactive interface."
                                                    ),
                                                 tags$hr(),

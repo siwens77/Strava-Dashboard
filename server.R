@@ -1,6 +1,5 @@
 server <- function(input, output, session) {
   
-  # ---- Helper: return a clean empty plotly when no data ----
   empty_plot <- function(msg = "No data for selected filters") {
     plotly::plot_ly(type = "scatter", mode = "markers") %>%
       plotly::layout(
@@ -20,7 +19,6 @@ server <- function(input, output, session) {
       plotly::config(displayModeBar = FALSE)
   }
 
-  # Ensure local layout/config refer to plotly (httr masks these names)
   layout <- plotly::layout
   config <- plotly::config
   activities_raw <- reactive({
@@ -286,11 +284,9 @@ server <- function(input, output, session) {
     
     metric <- if (!is.null(input$ov_metric)) input$ov_metric else "distance"
     
-    # Get year range from data
     min_year <- min(year(df$date), na.rm = TRUE)
     max_year <- max(year(df$date), na.rm = TRUE)
     
-    # Create all months for the entire year range
     all_months_seq <- seq(as.Date(paste0(min_year, "-01-01")), 
                           as.Date(paste0(max_year, "-12-01")), 
                           by = "month")
@@ -302,10 +298,8 @@ server <- function(input, output, session) {
         group_by(ym, type) %>%
         summarise(elev = sum(elevation_gain, na.rm = TRUE), .groups = "drop")
       
-      # Get all activity types from the data
       all_types <- unique(df$type)
       
-      # Create complete grid with all months and types
       complete_monthly <- data.frame(
         ym = rep(all_months$ym, times = length(all_types)),
         type = rep(all_types, each = length(all_months$ym))
@@ -340,10 +334,8 @@ server <- function(input, output, session) {
         group_by(ym, type) %>%
         summarise(dist = sum(distance_km, na.rm = TRUE), .groups = "drop")
       
-      # Get all activity types from the data
       all_types <- unique(df$type)
       
-      # Create complete grid with all months and types
       complete_monthly <- data.frame(
         ym = rep(all_months$ym, times = length(all_types)),
         type = rep(all_types, each = length(all_months$ym))
@@ -442,7 +434,6 @@ server <- function(input, output, session) {
       )
     }
     
-    # Loess trend line across all points
     if (nrow(df) >= 5) {
       df_sorted <- df %>% arrange(distance_km)
       lo <- loess(avg_speed ~ distance_km, data = df_sorted, span = 0.6)
@@ -463,9 +454,6 @@ server <- function(input, output, session) {
          )
   })
   
-  # ---- Elevation gain over time (scatter) ----
-  # Elevation over time graph removed  
-  # ---- Duration distribution (histogram) ----
   output$pf_duration <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(moving_time_min), moving_time_min > 0)
@@ -480,7 +468,6 @@ server <- function(input, output, session) {
       layout(showlegend = FALSE, margin = list(l = 45, b = 45))
   })
   
-  # ---- Calories over time ----
   output$pf_cals <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(calories), calories > 0) %>%
@@ -512,13 +499,11 @@ server <- function(input, output, session) {
        )
   })
   
-  # ---- Violin Plot: Max HR Distribution by Sport ----
   output$pf_violin <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(max_hr), max_hr > 0)
     if (nrow(df) == 0) return(empty_plot("No heart rate data"))
     
-    # Require at least 5 data points for a meaningful violin shape
     type_counts <- table(df$type)
     valid_types <- names(type_counts[type_counts >= 5])
     df <- df %>% filter(type %in% valid_types)
@@ -581,7 +566,6 @@ server <- function(input, output, session) {
       )
   })
   
-  # ---- Dead Time: Elapsed vs Moving Time ----
   output$pf_deadtime <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(elapsed_time_s), !is.na(moving_time_s),
@@ -596,7 +580,6 @@ server <- function(input, output, session) {
     
     max_val <- max(c(df$elapsed_min, df$moving_min), na.rm = TRUE)
     
-    # Build one trace per type to avoid color-grouping hover bugs
     p <- plot_ly()
     for (sport in unique(df$type)) {
       sport_df <- df[df$type == sport, ]
@@ -621,7 +604,6 @@ server <- function(input, output, session) {
       )
     }
     
-    # Diagonal reference line (perfect = no stops)
     p <- p %>% add_trace(
       x = c(0, max_val * 1.1), y = c(0, max_val * 1.1),
       type = "scatter", mode = "lines",
@@ -648,24 +630,20 @@ server <- function(input, output, session) {
       )
   })
   
-  # ---- Radar Chart: Sport Profile ----
   output$pf_radar <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(avg_speed))
     if (nrow(df) == 0) return(empty_plot("No data for radar"))
     
-    # Calculate means per type, normalize to 0–1
     metrics <- c("elevation_gain", "avg_speed", "distance_km",
                  "relative_effort", "calories", "max_hr")
     labels  <- c("Elevation", "Speed", "Distance",
                  "Effort", "Calories", "Max HR")
     
-    # Get types with enough data
     type_counts <- table(df$type)
     valid_types <- names(type_counts[type_counts >= 2])
     if (length(valid_types) == 0) return(empty_plot("Not enough data per sport"))
     
-    # Compute means
     agg <- df %>%
       filter(type %in% valid_types) %>%
       group_by(type) %>%
@@ -679,7 +657,6 @@ server <- function(input, output, session) {
         .groups = "drop"
       )
     
-    # Normalize each metric 0–100 for comparison
     for (m in metrics) {
       rng <- range(agg[[m]], na.rm = TRUE)
       if (rng[2] - rng[1] > 0) {
@@ -694,7 +671,7 @@ server <- function(input, output, session) {
     for (sport in valid_types) {
       vals <- unlist(agg[agg$type == sport, metrics], use.names = FALSE)
       vals <- as.numeric(vals)
-      vals <- c(vals, vals[1])  # close the polygon
+      vals <- c(vals, vals[1])
       theta <- c(labels, labels[1])
       
       p <- add_trace(p,
@@ -744,14 +721,12 @@ server <- function(input, output, session) {
       plotly::config(displayModeBar = FALSE)
   })
   
-  # ---- Efficiency Quadrant: Effort vs Speed ----
   output$pf_quadrant <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(relative_effort), relative_effort > 0,
              !is.na(avg_speed), avg_speed > 0)
     if (nrow(df) == 0) return(empty_plot("No effort/speed data"))
     
-    # Add jitter to spread out overlapping points
     df$jittered_speed <- jitter(df$avg_speed, amount = 0.2)
     df$jittered_effort <- jitter(df$relative_effort, amount = 7.5)
     
@@ -783,7 +758,6 @@ server <- function(input, output, session) {
     speed_range <- range(df$avg_speed, na.rm = TRUE)
     effort_range <- range(df$relative_effort, na.rm = TRUE)
     
-    # Quadrant labels
     annotations <- list(
       list(x = speed_range[2], y = effort_range[2],
            text = "Hard + Fast", showarrow = FALSE,
@@ -803,7 +777,6 @@ server <- function(input, output, session) {
            xanchor = "left", yanchor = "bottom")
     )
     
-    # Median lines (quadrant dividers)
     shapes <- list(
       list(type = "line",
            x0 = med_speed, x1 = med_speed,
@@ -824,7 +797,6 @@ server <- function(input, output, session) {
   })
   
 
-  # Shared reactive: the pace dataframe used by both chart and click handler
   ins_pace_df <- reactive({
     ins_filtered() %>%
       filter(!is.na(avg_speed), avg_speed > 0) %>%
@@ -836,7 +808,6 @@ server <- function(input, output, session) {
     df <- ins_pace_df()
     if (nrow(df) < 5) return(empty_plot("Not enough data — need at least 5 activities"))
     
-    # Determine x-axis range: full year if a specific year is selected
     sel_year <- input$ins_year
     if (!is.null(sel_year) && sel_year != "All") {
       yr <- as.integer(sel_year)
@@ -877,12 +848,10 @@ server <- function(input, output, session) {
       )
   })
   
-  # Observer: table row click → highlight that point on the chart via proxy
   observe({
     sel <- input$ins_top_table_rows_selected
     proxy <- plotlyProxy("ins_pace", session)
     
-    # Always remove old highlight trace first (trace index 1, 0-based)
     plotlyProxyInvoke(proxy, "deleteTraces", list(1L))
     
     if (!is.null(sel) && length(sel) > 0) {
@@ -909,7 +878,6 @@ server <- function(input, output, session) {
     }
   })
   
-  # Reactive: row index of hovered point in ins_pace
   ins_hover_key <- reactive({
     ev <- event_data("plotly_hover", source = "ins_pace")
     if (is.null(ev)) return(NULL)
@@ -947,7 +915,6 @@ server <- function(input, output, session) {
     )
   })
   
-  # Table renders once per filter change only — NOT on hover
   output$ins_top_table <- renderDT({
     df <- ins_filtered()
     if (nrow(df) == 0) return(datatable(
@@ -991,7 +958,6 @@ server <- function(input, output, session) {
       )
   })
   
-  # Separate observer: highlight table row on hover via JS proxy (no full re-render)
   observe({
     key <- ins_hover_key()
     df <- ins_filtered()
@@ -1009,7 +975,6 @@ server <- function(input, output, session) {
     row_idx <- which(table_sorted$date == hovered_date)   # 1-indexed
     if (length(row_idx) == 0) return()
     
-    # Send highlight info to JS
     session$sendCustomMessage("highlightInsRow", list(row = row_idx[1] - 1))  # 0-indexed
   })
   
@@ -1037,23 +1002,19 @@ server <- function(input, output, session) {
       )
     }
     
-    # Longest duration
     longest_dur <- if (nrow(df) > 0) {
       max_s <- max(df$moving_time_s, na.rm = TRUE)
       fmt_time(max_s)
     } else "—"
     
-    # Highest relative effort
     max_effort <- if (nrow(df) > 0 && any(!is.na(df$relative_effort)))
       round(max(df$relative_effort, na.rm = TRUE)) else NA
     
-    # Most active month
     most_active_month <- if (nrow(df) > 0) {
       month_counts <- table(format(df$date, "%b %Y"))
       names(which.max(month_counts))
     } else "—"
     
-    # Total distance
     total_dist <- if (nrow(df) > 0) 
       paste0(formatC(round(sum(df$distance_km, na.rm = TRUE), 1), format = "f", digits = 1), " km") else "—"
     
@@ -1086,7 +1047,6 @@ server <- function(input, output, session) {
                  most_active_month)
     )
   })
-  # ---- Chatbot ----
 chat_history <- reactiveVal(list())
 chat_request_times <- reactiveVal(list())
 
