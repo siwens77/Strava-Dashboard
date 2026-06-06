@@ -36,7 +36,12 @@ server <- function(input, output, session) {
     updateSelectInput(session, "ov_type",
                       choices  = c("All", types),
                       selected = "All")
-    # ins_year has been replaced by ins_dates
+    updateSelectInput(session, "pf_type",
+                      choices  = c("All", types),
+                      selected = "All")
+    updateSelectInput(session, "ins_type",
+                      choices  = c("All", types),
+                      selected = "All")
   })
   
   ov_data <- reactive({
