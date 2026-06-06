@@ -31,21 +31,19 @@ server <- function(input, output, session) {
     types <- sort(unique(df$type))
     
     updateSelectInput(session, "ov_year",
-                      choices  = c("All Years", as.character(years)),
-                      selected = "All Years")
-    updateSelectInput(session, "ov_type",
-                      choices  = c("All Types", types),
-                      selected = "All Types")
-    updateSelectInput(session, "ins_year",
                       choices  = c("All", as.character(years)),
                       selected = "All")
+    updateSelectInput(session, "ov_type",
+                      choices  = c("All", types),
+                      selected = "All")
+    # ins_year has been replaced by ins_dates
   })
   
   ov_data <- reactive({
     df <- activities_raw()
-    if (!is.null(input$ov_year) && input$ov_year != "All Years")
+    if (!is.null(input$ov_year) && input$ov_year != "All")
       df <- df[df$year == as.integer(input$ov_year), ]
-    if (!is.null(input$ov_type) && input$ov_type != "All Types")
+    if (!is.null(input$ov_type) && input$ov_type != "All")
       df <- df[df$type == input$ov_type, ]
     df
   })
@@ -68,12 +66,22 @@ server <- function(input, output, session) {
       df <- df[df$date >= input$pf_dates[1] & df$date <= input$pf_dates[2], ]
     df
   })
+  output$ins_date_ui <- renderUI({
+    df <- activities_raw()
+    sliderInput("ins_dates", NULL,
+                min       = min(df$date, na.rm = TRUE),
+                max       = max(df$date, na.rm = TRUE),
+                value     = c(min(df$date, na.rm = TRUE), max(df$date, na.rm = TRUE)),
+                timeFormat = "%Y-%m",
+                step      = 30)
+  })
+
   ins_filtered <- reactive({
     df <- activities_raw()
-    if (!is.null(input$ins_year) && input$ins_year != "All")
-      df <- df[df$year == as.integer(input$ins_year), ]
     if (!is.null(input$ins_type) && input$ins_type != "All")
       df <- df[df$type == input$ins_type, ]
+    if (!is.null(input$ins_dates))
+      df <- df[df$date >= input$ins_dates[1] & df$date <= input$ins_dates[2], ]
     df
   })
 
@@ -225,7 +233,7 @@ server <- function(input, output, session) {
     df <- ov_data()
     if (nrow(df) == 0) return(empty_plot())
     
-    yr <- if (!is.null(input$ov_year) && input$ov_year != "All Years")
+    yr <- if (!is.null(input$ov_year) && input$ov_year != "All")
       as.integer(input$ov_year)
     else as.integer(format(max(df$date, na.rm = TRUE), "%Y"))
     

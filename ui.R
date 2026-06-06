@@ -610,14 +610,16 @@ ui <- dashboardPage(
               fluidRow(
                 class = "overview-controls",
                 column(3,
-                       selectInput("ov_year", NULL,
-                                   choices  = c("All Years"),
-                                   selected = "All Years", width = "100%")
+                       tags$span(class = "filter-label", "Sport"),
+                       selectInput("ov_type", NULL,
+                                   choices  = c("All"),
+                                   selected = "All", width = "100%")
                 ),
                 column(3,
-                       selectInput("ov_type", NULL,
-                                   choices  = c("All Types"),
-                                   selected = "All Types", width = "100%")
+                       tags$span(class = "filter-label", "Year"),
+                       selectInput("ov_year", NULL,
+                                   choices  = c("All"),
+                                   selected = "All", width = "100%")
                 )
               ),
               
@@ -698,14 +700,13 @@ ui <- dashboardPage(
               fluidRow(
                 class = "overview-controls",
                 column(3,
-                       tags$span(class = "filter-label", "Year"),
-                       selectInput("ins_year", NULL,
-                                   choices = c("All"), selected = "All", width = "100%")),
-                column(3,
                        tags$span(class = "filter-label", "Sport"),
                        selectInput("ins_type", NULL,
                                    choices = c("All","Run","Ride","Swim","Hike","Walk","Workout"),
-                                   selected = "All", width = "100%"))
+                                   selected = "All", width = "100%")),
+                column(8, class = "slider-col",
+                       tags$span(class = "filter-label", "Date Range"),
+                       uiOutput("ins_date_ui"))
               ),
               
 
