@@ -256,23 +256,38 @@ server <- function(input, output, session) {
         lbl  = format(date, "%d %b %Y")
       )
     
+    m_val <- max(3, max(all_days$n))
     plotly::plot_ly(all_days,
             x = ~wk, y = ~dow, z = ~n,
             type          = "heatmap",
             colorscale    = list(c(0,"#f3f4f6"), c(0.01,"#ffd4c2"), c(1, ORANGE)),
-            showscale     = FALSE,
+            showscale     = TRUE,
+            colorbar      = list(
+              title = "",
+              orientation = "h",
+              x = 1.0, y = -0.25,
+              xanchor = "right", yanchor = "top",
+              thickness = 10, len = 0.25,
+              tickmode = "array",
+              tickvals = c(0, m_val),
+              ticktext = c("Less", "More"),
+              outlinewidth = 0,
+              tickfont = list(size = 11, color = "#6b7280")
+            ),
             hovertemplate = "<b>%{customdata}</b><br>Activities: %{z}<extra></extra>",
             customdata    = ~lbl,
-            zmin = 0, zmax = max(3, max(all_days$n))
+            zmin = 0, zmax = m_val
     ) %>%
       layout(
         paper_bgcolor = "transparent",
         plot_bgcolor  = "transparent",
         xaxis = list(
-          showticklabels = FALSE, 
-          ticks = "",        
+          tickmode = "array",
+          tickvals = c(3, 7, 11, 16, 20, 24, 29, 33, 38, 42, 46, 51),
+          ticktext = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
           showline = FALSE,      
-          title = "", showgrid = FALSE, zeroline = FALSE
+          title = "", showgrid = FALSE, zeroline = FALSE,
+          tickfont = list(size = 10, color = "#9ca3af")
         ),
         yaxis = list(
           tickvals  = 1:7,
@@ -388,10 +403,10 @@ server <- function(input, output, session) {
             type    = "pie", hole = 0.55,
             marker  = list(colors = activity_color(split$type),
                            line   = list(color = "white", width = 2)),
-            textinfo      = "label+percent",
+            texttemplate  = "%{label}<br>%{percent:.1%}",
             textfont      = list(size = 11, color = "white"),  
             insidetextfont = list(color = "white"),       
-            hovertemplate = "<b>%{label}</b><br>%{value} activities (%{percent})<extra></extra>"
+            hovertemplate = "<b>%{label}</b><br>%{value} activities (%{percent:.1%})<extra></extra>"
     ) %>%
       layout(
         paper_bgcolor = "transparent",
@@ -425,7 +440,8 @@ server <- function(input, output, session) {
   
   output$pf_scatter <- renderPlotly({
     df <- pf_filtered() %>%
-      filter(!is.na(avg_speed), !is.na(distance_km), avg_speed > 0)
+      filter(!is.na(avg_speed), !is.na(distance_km), avg_speed > 0) %>%
+      mutate(avg_speed = avg_speed * 3.6)
     if (nrow(df) == 0) return(empty_plot())
     
     types <- unique(df$type)
@@ -494,33 +510,27 @@ server <- function(input, output, session) {
       left_join(weekly, by = "week") %>%
       mutate(cals = ifelse(is.na(cals), 0, cals))
     
-    timeline$idx <- seq_len(nrow(timeline))
-    lo <- tryCatch(
-      loess(cals ~ idx, data = timeline, span = 0.3),
-      error = function(e) NULL
-    )
-    
-    if (!is.null(lo)) {
-      timeline$trend <- pmax(0, predict(lo))
-    } else {
-      timeline$trend <- timeline$cals
+    timeline$trend <- NA
+    for (i in 1:nrow(timeline)) {
+      start_idx <- max(1, i - 3)
+      timeline$trend[i] <- mean(timeline$cals[start_idx:i])
     }
     
     p <- plotly::plot_ly(timeline) %>%
       plotly::add_trace(x = ~week, y = ~cals, name = "Weekly Total",
                 type = "bar",
-                marker = list(color = paste0(ORANGE, "88")),
+                marker = list(color = paste0(ORANGE, "99")),
                 hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>Total: %{y:.0f} kcal<extra></extra>",
                 showlegend = TRUE) %>%
-      plotly::add_trace(x = ~week, y = ~trend, name = "Momentum Trend",
+      plotly::add_trace(x = ~week, y = ~trend, name = "4-Week Avg",
                 type = "scatter", mode = "lines",
-                line = list(color = ORANGE, width = 3, shape = "spline"),
-                hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>Trend: %{y:.0f} kcal/week<extra></extra>",
+                line = list(color = ORANGE, width = 3, shape = "linear"),
+                hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>4-Week Avg: %{y:.0f} kcal/week<extra></extra>",
                 showlegend = TRUE)
     
     strava_layout(p, xlab = "Week", ylab = "Calories (kcal)") %>%
        layout(
-         xaxis = list(type = "date"),
+         xaxis = list(type = "date", dtick = "M6", tickformat = "%b '%y"),
          yaxis = list(rangemode = "tozero"),
          legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
        )
@@ -828,6 +838,7 @@ server <- function(input, output, session) {
   ins_pace_df <- reactive({
     ins_filtered() %>%
       filter(!is.na(avg_speed), avg_speed > 0) %>%
+      mutate(avg_speed = avg_speed * 3.6) %>%
       arrange(date) %>%
       mutate(row_key = row_number())
   })
@@ -937,7 +948,7 @@ server <- function(input, output, session) {
       tags$span(style = "color:#6b7280;",
                 icon("road"), " ", round(row$distance_km, 1), " km"),
       tags$span(style = "color:#6b7280;",
-                icon("tachometer-alt"), " ", round(row$avg_speed, 1), " km/h"),
+                icon("tachometer-alt"), " ", round(row$avg_speed * 3.6, 1), " km/h"),
       if (!is.na(row$elevation_gain) && row$elevation_gain > 0)
         tags$span(style = "color:#6b7280;",
                   icon("mountain"), " ", row$elevation_gain, " m")
@@ -960,10 +971,10 @@ server <- function(input, output, session) {
         `Dist (km)` = round(distance_km, 2),
         `Elev (m)`  = elevation_gain,
         Calories    = ifelse(!is.na(calories) & calories > 0, as.character(calories), "—"),
-        Duration    = ifelse(!is.na(moving_time_min), as.character(moving_time_min), "—"),
+        `Duration (min)` = ifelse(!is.na(moving_time_min), as.character(moving_time_min), "—"),
         `Max HR`    = ifelse(!is.na(max_hr), as.character(max_hr), "—")
       ) %>%
-      select(Date, Name, Type, `Dist (km)`, `Elev (m)`, Calories, Duration, `Max HR`)
+      select(Date, Name, Type, `Dist (km)`, `Elev (m)`, Calories, `Duration (min)`, `Max HR`)
     
     datatable(
       table_data,
@@ -1129,8 +1140,8 @@ observeEvent(input$chat_send, {
     } else {
       n_acts     <- nrow(df_ctx)
       total_dist <- round(sum(df_ctx$distance_km, na.rm = TRUE), 1)
-      avg_speed  <- if (all(is.na(df_ctx$avg_speed))) NA else round(mean(df_ctx$avg_speed, na.rm = TRUE), 1)
-      best_speed <- if (all(is.na(df_ctx$avg_speed))) NA else round(max(df_ctx$avg_speed, na.rm = TRUE), 1)
+      avg_speed  <- if (all(is.na(df_ctx$avg_speed))) NA else round(mean(df_ctx$avg_speed, na.rm = TRUE) * 3.6, 1)
+      best_speed <- if (all(is.na(df_ctx$avg_speed))) NA else round(max(df_ctx$avg_speed, na.rm = TRUE) * 3.6, 1)
       total_elev <- round(sum(df_ctx$elevation_gain, na.rm = TRUE), 1)
       hr_min     <- if (all(is.na(df_ctx$max_hr))) NA else min(df_ctx$max_hr, na.rm = TRUE)
       hr_max     <- if (all(is.na(df_ctx$max_hr))) NA else max(df_ctx$max_hr, na.rm = TRUE)
@@ -1142,7 +1153,7 @@ observeEvent(input$chat_send, {
         paste0(
           format(r$date, "%d %b %Y"), " - ", r$type, " - ", round(r$distance_km, 1), " km",
           if (!is.na(r$moving_time_min)) paste0(", ", r$moving_time_min, " min") else "",
-          if (!is.na(r$avg_speed))       paste0(", avg ", round(r$avg_speed, 1), " km/h") else "",
+          if (!is.na(r$avg_speed))       paste0(", avg ", round(r$avg_speed * 3.6, 1), " km/h") else "",
           if (!is.na(r$max_hr))          paste0(", HRmax ", r$max_hr, " bpm") else "",
           if (!is.na(r$elevation_gain))  paste0(", elev ", round(r$elevation_gain, 1), " m") else "",
           if (!is.na(r$calories))        paste0(", ", round(r$calories), " kcal") else "",

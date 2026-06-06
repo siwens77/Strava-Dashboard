@@ -653,7 +653,7 @@ ui <- dashboardPage(
                   plotlyOutput("monthly_dist", height = "230px")
                 ),
                 box(
-                  title = tagList(icon("chart-pie"), "Activity Split"),
+                  title = tagList(icon("chart-pie"), "Activity Split (Total Sessions)"),
                   width = 4, class = "box-orange",
                   plotlyOutput("ov_donut",     height = "276px")
                 )
