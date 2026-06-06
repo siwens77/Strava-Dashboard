@@ -677,14 +677,14 @@ ui <- dashboardPage(
                  box(title = tagList(icon("music"), "Effort Distribution by Sport"),
                      width = 6, class = "box-orange",
                      plotlyOutput("pf_violin", height = "320px")),
-                 box(title = tagList(icon("crosshairs"), "Efficiency Quadrant"),
+                 box(title = tagList(icon("bullseye"), "Sport Profile Radar"),
                      width = 6, class = "box-orange",
-                     plotlyOutput("pf_quadrant", height = "320px"))
+                     plotlyOutput("pf_radar", height = "320px"))
                ),
                 fluidRow(
-                  box(title = tagList(icon("bullseye"), "Sport Profile Radar"),
+                  box(title = tagList(icon("crosshairs"), "Efficiency Quadrant"),
                       width = 6, class = "box-orange",
-                      plotlyOutput("pf_radar", height = "320px")),
+                      plotlyOutput("pf_quadrant", height = "320px")),
                   box(title = tagList(icon("fire"), "Calories Over Time"),
                       width = 6, class = "box-orange",
                       plotlyOutput("pf_cals", height = "320px"))

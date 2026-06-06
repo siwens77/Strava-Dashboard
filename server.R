@@ -816,12 +816,7 @@ server <- function(input, output, session) {
       layout(
         annotations = annotations,
         shapes = shapes,
-        margin = list(l = 50, b = 70, t = 20),
-        legend = list(
-          orientation = "h", x = 0, y = -0.28,
-          font = list(size = 13)
-        ),
-        xaxis = list(title = list(standoff = 5))
+        legend = list(orientation = "h", x = 0, y = -0.18, font = list(size = 13, color = "#1f2937"))
       )
   })
   
