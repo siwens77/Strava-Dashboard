@@ -864,8 +864,8 @@ server <- function(input, output, session) {
                 x = ~date, y = ~avg_speed,
                 key = ~row_key,
                 type   = "scatter", mode = "markers",
-                marker = list(color = paste0(ORANGE, "77"), size = 9,
-                              line = list(color = ORANGE, width = 1)),
+                marker = list(color = activity_color(df$type), size = 9, opacity = 0.75,
+                              line = list(color = "white", width = 1)),
                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.1f} km/h<extra></extra>",
                 showlegend = FALSE
       ) %>%
