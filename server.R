@@ -503,6 +503,7 @@ server <- function(input, output, session) {
     strava_layout(p, xlab = "Date", ylab = "Calories Burned (kcal)") %>%
        layout(
          xaxis = list(type = "date"),
+         yaxis = list(rangemode = "tozero"),
          legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
        )
   })
@@ -800,6 +801,7 @@ server <- function(input, output, session) {
       layout(
         annotations = annotations,
         shapes = shapes,
+        yaxis = list(rangemode = "tozero"),
         legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
       )
   })
@@ -849,6 +851,7 @@ server <- function(input, output, session) {
           title = list(text = "Date", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20)
         ),
         yaxis = list(
+          rangemode = "tozero",
           tickfont = list(size = 14, color = "#1f2937", family = "Inter"),
           title = list(text = "Avg Speed (km/h)", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20)
         ),
