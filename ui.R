@@ -634,7 +634,7 @@ ui <- dashboardPage(
                 box(
                   title = tagList(icon("calendar"), "Activity Calendar"),
                   width = 12, class = "box-orange",
-                  plotlyOutput("heatmap_cal", height = "185px")
+                  plotlyOutput("heatmap_cal", height = "210px")
                 )
               ),
               

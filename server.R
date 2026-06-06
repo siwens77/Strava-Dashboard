@@ -277,7 +277,7 @@ server <- function(input, output, session) {
               tickvals = c(0, m_val),
               ticktext = c("Less", "More"),
               outlinewidth = 0,
-              tickfont = list(size = 11, color = "#6b7280")
+              tickfont = list(size = 13, color = "#374151")
             ),
             hovertemplate = "<b>%{customdata}</b><br>Activities: %{z}<extra></extra>",
             customdata    = ~lbl,
