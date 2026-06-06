@@ -711,7 +711,7 @@ ui <- dashboardPage(
               
 
               fluidRow(style = "display:flex; flex-wrap:wrap; align-items:stretch;",
-                box(title = tagList(icon("chart-line"), "Average Speed Trend"),
+                box(title = tagList(icon("chart-line"), "Average Speed"),
                     width = 8, class = "box-orange",
                     plotlyOutput("ins_pace", height = "420px")),
                 box(title = tagList(icon("trophy"), "Personal Records"),
@@ -792,7 +792,7 @@ ui <- dashboardPage(
                                                    tags$li(tags$strong("Performance:"),
                                                            " Violin plot of max heart rate distribution by sport, Efficiency Quadrant showing effort vs speed with quadrant labels, Sport Profile Radar with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and Calories Over Time scatter with trend line. Filterable by sport and date range."),
                                                   tags$li(tags$strong("Insights:"),
-                                                          " Rolling average-speed trend, ",
+                                                          " Rolling average-speed, ",
                                                           "personal records leaderboard, and ranked top-activities table, all filter by year and sport."),
                                                   tags$li(tags$strong("AI Chatbot:"),
                                                           " A personal chatbot powered by your training data, ",

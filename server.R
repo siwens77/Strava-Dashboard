@@ -478,29 +478,47 @@ server <- function(input, output, session) {
   
   output$pf_cals <- renderPlotly({
     df <- pf_filtered() %>%
-      filter(!is.na(calories), calories > 0) %>%
-      arrange(date)
+      filter(!is.na(calories), calories > 0)
     if (nrow(df) == 0) return(empty_plot("No calorie data"))
     
-    p <- plotly::plot_ly(df,
-                 x = ~date, y = ~calories, name = "Activity",
-                 type = "scatter", mode = "markers",
-                 marker = list(color = paste0(ORANGE, "66"), size = 5),
-                 hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.0f} kcal<extra></extra>",
-                 showlegend = TRUE)
+    weekly <- df %>%
+      mutate(week = lubridate::floor_date(date, "week", week_start = 1)) %>%
+      group_by(week) %>%
+      summarise(cals = sum(calories, na.rm = TRUE), .groups = "drop") %>%
+      arrange(week)
+      
+    if (nrow(weekly) < 2) return(empty_plot("Not enough weeks for trend"))
     
-    if (nrow(df) >= 5) {
-      df$idx <- seq_len(nrow(df))
-      lo <- loess(calories ~ idx, data = df, span = 0.4)
-      df$trend <- predict(lo)
-      p <- plotly::add_trace(p, data = df[!is.na(df$trend),],
-                     x = ~date, y = ~trend, name = "Trend",
-                     type = "scatter", mode = "lines",
-                     line = list(color = ORANGE, width = 2), hoverinfo = "skip",
-                     showlegend = TRUE)
+    timeline <- data.frame(week = seq(min(weekly$week), max(weekly$week), by = "week"))
+    timeline <- timeline %>%
+      left_join(weekly, by = "week") %>%
+      mutate(cals = ifelse(is.na(cals), 0, cals))
+    
+    timeline$idx <- seq_len(nrow(timeline))
+    lo <- tryCatch(
+      loess(cals ~ idx, data = timeline, span = 0.3),
+      error = function(e) NULL
+    )
+    
+    if (!is.null(lo)) {
+      timeline$trend <- pmax(0, predict(lo))
+    } else {
+      timeline$trend <- timeline$cals
     }
     
-    strava_layout(p, xlab = "Date", ylab = "Calories Burned (kcal)") %>%
+    p <- plotly::plot_ly(timeline) %>%
+      plotly::add_trace(x = ~week, y = ~cals, name = "Weekly Total",
+                type = "bar",
+                marker = list(color = paste0(ORANGE, "88")),
+                hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>Total: %{y:.0f} kcal<extra></extra>",
+                showlegend = TRUE) %>%
+      plotly::add_trace(x = ~week, y = ~trend, name = "Momentum Trend",
+                type = "scatter", mode = "lines",
+                line = list(color = ORANGE, width = 3, shape = "spline"),
+                hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>Trend: %{y:.0f} kcal/week<extra></extra>",
+                showlegend = TRUE)
+    
+    strava_layout(p, xlab = "Week", ylab = "Calories (kcal)") %>%
        layout(
          xaxis = list(type = "date"),
          yaxis = list(rangemode = "tozero"),
