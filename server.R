@@ -488,25 +488,29 @@ server <- function(input, output, session) {
     if (nrow(df) == 0) return(empty_plot("No calorie data"))
     
     p <- plotly::plot_ly(df,
-                 x = ~date, y = ~calories,
+                 x = ~date, y = ~calories, name = "Activity",
                  type = "scatter", mode = "markers",
                  marker = list(color = paste0(ORANGE, "66"), size = 5),
                  hovertemplate = "<b>%{x|%d %b %Y}</b><br>%{y:.0f} kcal<extra></extra>",
-                 showlegend = FALSE)
+                 showlegend = TRUE)
     
     if (nrow(df) >= 5) {
       df$idx <- seq_len(nrow(df))
       lo <- loess(calories ~ idx, data = df, span = 0.4)
       df$trend <- predict(lo)
       p <- plotly::add_trace(p, data = df[!is.na(df$trend),],
-                     x = ~date, y = ~trend,
+                     x = ~date, y = ~trend, name = "Trend",
                      type = "scatter", mode = "lines",
                      line = list(color = ORANGE, width = 2), hoverinfo = "skip",
-                     showlegend = FALSE)
+                     showlegend = TRUE)
     }
     
     strava_layout(p, xlab = "Date", ylab = "Calories Burned (kcal)") %>%
-       layout(xaxis = list(type = "date"), showlegend = FALSE)
+       layout(
+         xaxis = list(type = "date"),
+         showlegend = TRUE,
+         legend = list(orientation = "h", x = 0, y = -0.18, font = list(size = 13, color = "#1f2937"))
+       )
   })
   
   # ---- Violin Plot: Effort Distribution by Sport ----
@@ -973,7 +977,7 @@ server <- function(input, output, session) {
       selection = list(mode = "single", target = "row"),
       class     = "compact hover",
       options   = list(
-        pageLength = 10,
+        pageLength = 6,
         scrollX    = FALSE,
         dom        = "tip",
         columnDefs = list(

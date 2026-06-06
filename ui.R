@@ -676,10 +676,10 @@ ui <- dashboardPage(
                fluidRow(
                  box(title = tagList(icon("music"), "Effort Distribution by Sport"),
                      width = 6, class = "box-orange",
-                     plotlyOutput("pf_violin", height = "300px")),
+                     plotlyOutput("pf_violin", height = "320px")),
                  box(title = tagList(icon("crosshairs"), "Efficiency Quadrant"),
                      width = 6, class = "box-orange",
-                     plotlyOutput("pf_quadrant", height = "300px"))
+                     plotlyOutput("pf_quadrant", height = "320px"))
                ),
                 fluidRow(
                   box(title = tagList(icon("bullseye"), "Sport Profile Radar"),
