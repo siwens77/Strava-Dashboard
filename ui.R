@@ -674,7 +674,7 @@ ui <- dashboardPage(
                
                # Graphs arranged in pairs
                fluidRow(
-                 box(title = tagList(icon("music"), "Effort Distribution by Sport"),
+                 box(title = tagList(icon("heartbeat"), "Max HR Distribution by Sport"),
                      width = 6, class = "box-orange",
                      plotlyOutput("pf_violin", height = "320px")),
                  box(title = tagList(icon("bullseye"), "Sport Profile Radar"),
@@ -788,7 +788,7 @@ ui <- dashboardPage(
                                                           " All-time statistics, a GitHub-style activity calendar, monthly ",
                                                           "distance bars, and an activity donut chart. Filter by year and sport."),
                                                    tags$li(tags$strong("Performance:"),
-                                                           " Violin plot of relative effort distribution by sport, Efficiency Quadrant showing effort vs speed with quadrant labels, Sport Profile Radar with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and Calories Over Time scatter with trend line. Filterable by sport and date range."),
+                                                           " Violin plot of max heart rate distribution by sport, Efficiency Quadrant showing effort vs speed with quadrant labels, Sport Profile Radar with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and Calories Over Time scatter with trend line. Filterable by sport and date range."),
                                                   tags$li(tags$strong("Insights:"),
                                                           " Rolling average-speed trend, ",
                                                           "personal records leaderboard, and ranked top-activities table, all filter by year and sport."),
