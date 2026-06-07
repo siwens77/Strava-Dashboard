@@ -537,6 +537,7 @@ server <- function(input, output, session) {
            showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
          ),
          yaxis = list(rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+         margin = list(b = 75),
          showlegend = FALSE
        )
   })
