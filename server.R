@@ -536,7 +536,7 @@ server <- function(input, output, session) {
            type = "date", 
            tickformat = "%b '%y",
            showticklabels = TRUE, 
-           title = list(text = "Time", font = list(size = 16, color = "#111827", family = "Inter, sans-serif"), standoff = 8),
+           title = list(text = ""),
            tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
            showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
          ),
@@ -910,7 +910,7 @@ server <- function(input, output, session) {
           tickformat = x_format,
           tickfont = list(size = 14, color = "#1f2937", family = "Inter"),
           dtick = x_dtick,
-          title = list(text = "Date", font = list(size = 15, color = "#1f2937", family = "Inter"), standoff = 20),
+          title = list(text = ""),
           gridcolor = "#f1f5f9", showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
         yaxis = list(
