@@ -293,14 +293,14 @@ server <- function(input, output, session) {
           ticktext = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"),
           showline = FALSE,      
           title = "", showgrid = FALSE, zeroline = FALSE,
-          tickfont = list(size = 10, color = "#9ca3af")
+          tickfont = list(size = 14, color = "#9ca3af")
         ),
         yaxis = list(
           tickvals  = 1:7,
-          ticktext  = c("Mon","","Wed","","Fri","","Sun"),
+          ticktext  = c("Mon","","","Thu","","","Sun"),
           title     = "", autorange = "reversed",
           showgrid  = FALSE, zeroline = FALSE,
-          tickfont  = list(size = 10, color = "#9ca3af")
+          tickfont  = list(size = 14, color = "#9ca3af")
         ),
         margin = list(l = 35, r = 10, t = 5, b = 10)
       ) %>%
@@ -782,21 +782,21 @@ server <- function(input, output, session) {
   output$pf_quadrant <- renderPlotly({
     df <- pf_filtered() %>%
       filter(!is.na(relative_effort), relative_effort > 0,
-             !is.na(avg_speed), avg_speed > 0)
-    if (nrow(df) == 0) return(empty_plot("No effort/speed data"))
+             !is.na(calories), calories > 0)
+    if (nrow(df) == 0) return(empty_plot("No effort/calories data"))
     
-    df$jittered_speed <- jitter(df$avg_speed, amount = 0.2)
+    df$jittered_cal <- jitter(df$calories, amount = 15)
     df$jittered_effort <- jitter(df$relative_effort, amount = 7.5)
     
-    med_speed  <- median(df$avg_speed, na.rm = TRUE)
+    med_cal  <- median(df$calories, na.rm = TRUE)
     med_effort <- median(df$relative_effort, na.rm = TRUE)
     
     p <- plot_ly()
     for (sport in unique(df$type)) {
       sport_df <- df[df$type == sport, ]
       p <- p %>% add_trace(
-        x = sport_df$jittered_speed,
-        y = sport_df$jittered_effort,
+        x = sport_df$jittered_effort,
+        y = sport_df$jittered_cal,
         type = "scatter", mode = "markers",
         name = sport,
         marker = list(
@@ -807,57 +807,57 @@ server <- function(input, output, session) {
         text = paste0(
           sport_df$name,
           "\nDistance: ", round(sport_df$distance_km, 1), " km",
-          "\nSpeed: ", round(sport_df$avg_speed, 2), " m/s",
+          "\nCalories: ", round(sport_df$calories), " kcal",
           "\nEffort: ", round(sport_df$relative_effort)
         ),
         hoverinfo = "text"
       )
     }
     
-    speed_range <- range(df$avg_speed, na.rm = TRUE)
+    cal_range <- range(df$calories, na.rm = TRUE)
     effort_range <- range(df$relative_effort, na.rm = TRUE)
     
     annotations <- list(
-      list(x = speed_range[2], y = effort_range[2],
-           text = "Hard + Fast", showarrow = FALSE,
+      list(x = effort_range[2], y = cal_range[2],
+           text = "Hard + High Burn", showarrow = FALSE,
            font = list(size = 11, color = "#ef4444", family = "Inter"),
            xanchor = "right", yanchor = "top"),
-      list(x = speed_range[1], y = effort_range[2],
-           text = "Hard + Slow", showarrow = FALSE,
-           font = list(size = 11, color = "#f59e0b", family = "Inter"),
-           xanchor = "left", yanchor = "top"),
-      list(x = speed_range[2], y = effort_range[1],
-           text = "Easy + Fast", showarrow = FALSE,
+      list(x = effort_range[1], y = cal_range[2],
+           text = "Easy + High Burn", showarrow = FALSE,
            font = list(size = 11, color = "#10b981", family = "Inter"),
+           xanchor = "left", yanchor = "top"),
+      list(x = effort_range[2], y = cal_range[1],
+           text = "Hard + Low Burn", showarrow = FALSE,
+           font = list(size = 11, color = "#f59e0b", family = "Inter"),
            xanchor = "right", yanchor = "bottom"),
-      list(x = speed_range[1], y = effort_range[1],
-           text = "Easy + Slow", showarrow = FALSE,
+      list(x = effort_range[1], y = cal_range[1],
+           text = "Easy + Low Burn", showarrow = FALSE,
            font = list(size = 11, color = "#6b7280", family = "Inter"),
            xanchor = "left", yanchor = "bottom")
     )
     
     shapes <- list(
       list(type = "line",
-           x0 = med_speed, x1 = med_speed,
-           y0 = effort_range[1] * 0.9, y1 = effort_range[2] * 1.05,
+           x0 = med_effort, x1 = med_effort,
+           y0 = cal_range[1] * 0.9, y1 = cal_range[2] * 1.05,
            line = list(color = "#d1d5db", width = 1, dash = "dot")),
       list(type = "line",
-           x0 = speed_range[1] * 0.95, x1 = speed_range[2] * 1.05,
-           y0 = med_effort, y1 = med_effort,
+           x0 = effort_range[1] * 0.95, x1 = effort_range[2] * 1.05,
+           y0 = med_cal, y1 = med_cal,
            line = list(color = "#d1d5db", width = 1, dash = "dot"))
     )
     
-    strava_layout(p, xlab = "Avg Speed (m/s)", ylab = "Relative Effort") %>%
+    strava_layout(p, xlab = "Relative Effort", ylab = "Burned Calories") %>%
       layout(
         annotations = annotations,
         shapes = shapes,
         xaxis = list(
-          title = list(text = "Avg Speed (m/s)", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          title = list(text = "Relative Effort", font = list(size = 16, color = "#111827", family = "Inter, sans-serif"), standoff = 10),
           tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
           showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
         yaxis = list(
-          title = list(text = "Relative Effort", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          title = list(text = "Burned Calories", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
           tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
           rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),

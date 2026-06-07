@@ -791,7 +791,7 @@ ui <- dashboardPage(
                                                           " All-time statistics, a GitHub-style activity calendar, monthly ",
                                                           "activity bars, and an Activity Split by Total Sessions pie chart. Filterable by year and dynamically detected sports."),
                                                    tags$li(tags$strong("Performance:"),
-                                                           " Violin plot of maximal heart rate distribution, Efficiency Quadrant showing effort vs speed with quadrant labels, Comparative Sport Profile with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and a sleek Burned Calories Over Time area chart. Filterable by sport and date range."),
+                                                           " Violin plot of maximal heart rate distribution, Efficiency Quadrant showing effort vs burned calories with quadrant labels, Comparative Sport Profile with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and a sleek Burned Calories Over Time area chart. Filterable by sport and date range."),
                                                   tags$li(tags$strong("Insights:"),
                                                           " Average Speed Trend timeline with pacing jitter, ",
                                                           "personal records leaderboard, and ranked all-activities table. Filterable by year and sport."),
