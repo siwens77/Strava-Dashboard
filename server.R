@@ -347,14 +347,14 @@ server <- function(input, output, session) {
         )
       }
       
-      strava_layout(p, xlab = "", ylab = "meters") %>%
+      strava_layout(p, xlab = "", ylab = "Meters") %>%
         layout(
           barmode = "stack",
           legend  = list(orientation = "h", y = -0.18, x = 0,
                          font = list(size = 13, color = "#1f2937")),
-          xaxis   = list(type = "date", tickformat = "%b",
+          xaxis   = list(type = "date", tickformat = "%b", dtick = "M1",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
-          yaxis   = list(title = list(text = "meters", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
+          yaxis   = list(title = list(text = "Meters", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
         )
     } else {
@@ -388,7 +388,7 @@ server <- function(input, output, session) {
           barmode = "stack",
           legend  = list(orientation = "h", y = -0.18, x = 0,
                          font = list(size = 13, color = "#1f2937")),
-          xaxis   = list(type = "date", tickformat = "%b",
+          xaxis   = list(type = "date", tickformat = "%b", dtick = "M1",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
           yaxis   = list(title = list(text = "Kilometers", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
@@ -410,14 +410,15 @@ server <- function(input, output, session) {
             marker  = list(colors = activity_color(split$type),
                            line   = list(color = "white", width = 2)),
             texttemplate  = "%{label}<br>%{percent:.1%}",
-            textfont      = list(size = 14, color = "white", family = "Inter, sans-serif"),  
-            insidetextfont = list(size = 14, color = "white", family = "Inter, sans-serif"),       
+            textfont      = list(size = 18, color = "white", family = "Inter, sans-serif"),  
+            insidetextfont = list(size = 18, color = "white", family = "Inter, sans-serif"),       
             hovertemplate = "<b>%{label}</b><br>%{value} activities (%{percent:.1%})<extra></extra>"
     ) %>%
       layout(
         paper_bgcolor = "transparent",
         showlegend    = FALSE,
         margin        = list(l = 5, r = 5, t = 5, b = 5),
+        uniformtext   = list(minsize = 18, mode = FALSE),
         hoverlabel    = list(bgcolor = DARK, bordercolor = ORANGE,
                              font = list(color = "white", size = 12))
       ) %>%
@@ -860,7 +861,7 @@ server <- function(input, output, session) {
           tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
           rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
-        legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
+        legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 16, color = "#1f2937"))
       )
   })
   
@@ -1131,7 +1132,7 @@ output$chat_history <- renderUI({
   msgs <- chat_history()
   if (length(msgs) == 0) {
     return(tags$div(
-      style = "text-align:center; color:#9ca3af; font-size:13px; padding:40px 0;",
+      style = "text-align:center; color:#9ca3af; font-size:16px; padding:40px 0;",
       icon("robot"), " Ask your coach anything about your training."
     ))
   }

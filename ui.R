@@ -7,7 +7,7 @@ custom_css <- "
 .user-row  { flex-direction: row-reverse; }
 .chat-bubble {
   max-width: 72%; padding: 10px 14px; border-radius: 18px;
-  font-size: 13px; line-height: 1.6; word-wrap: break-word;
+  font-size: 15px; line-height: 1.6; word-wrap: break-word;
   font-family: 'Inter', sans-serif;
 }
 .chat-bubble.user {
@@ -38,7 +38,7 @@ custom_css <- "
   border-radius: 14px !important;
   border: 1.5px solid #e5e7eb !important;
   padding: 14px 16px !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   resize: none !important;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -54,7 +54,7 @@ custom_css <- "
   background: linear-gradient(135deg, #FC4C02, #ff7a42) !important;
   color: white !important;
   font-family: 'Inter', sans-serif !important;
-  font-size: 14px !important;
+  font-size: 18px !important;
   font-weight: 600 !important;
   letter-spacing: 0.5px;
   cursor: pointer;
@@ -129,7 +129,7 @@ body, .wrapper { background: linear-gradient(135deg, #f0f2f5 0%, #e8eaef 100%) !
 .sidebar-menu > li > a {
   border-left: 3px solid transparent !important;
   color: #9ca3af !important;
-  font-size: 13px !important; font-weight: 500 !important;
+  font-size: 16px !important; font-weight: 500 !important;
   padding: 12px 16px 12px 20px !important;
   transition: all .2s !important;
 }
@@ -142,7 +142,7 @@ body, .wrapper { background: linear-gradient(135deg, #f0f2f5 0%, #e8eaef 100%) !
 .sidebar-menu > li > a > .fa,
 .sidebar-menu > li > a > .fas { color: inherit !important; width: 20px; }
 .sidebar-menu .header {
-  color: #4b5563 !important; font-size: 10px !important;
+  color: #4b5563 !important; font-size: 12px !important;
   text-transform: uppercase; letter-spacing: 1.4px;
   padding: 16px 20px 5px !important; font-weight: 700 !important;
 }
@@ -367,16 +367,16 @@ table.dataTable tbody tr:hover td { background: rgba(252,76,2,.04) !important; c
   margin: 0 auto 14px; display: block;
   object-fit: cover;
 }
-.about-hero h1  { font-size:50px; font-weight:900; letter-spacing:5px; margin:0 0 7px; }
-.about-hero p   { font-size:15px; opacity:.9; margin:0; }
+.about-hero h1  { font-size:60px; font-weight:900; letter-spacing:5px; margin:0 0 7px; }
+.about-hero p   { font-size:18px; opacity:.9; margin:0; }
 .about-card {
   background:white; border-radius:13px; padding:22px;
   margin-bottom:18px; box-shadow:0 1px 5px rgba(0,0,0,.08);
   height: calc(100% - 18px);
 }
-.about-card h3  { font-size:14px; font-weight:700; color:#111827; margin:0 0 11px; }
+.about-card h3  { font-size:18px; font-weight:700; color:#111827; margin:0 0 11px; }
 .about-card h3 .fa { color:#FC4C02; margin-right:7px; }
-.about-card p, .about-card li { font-size:12px; color:#6b7280; line-height:1.75; }
+.about-card p, .about-card li { font-size:15px; color:#6b7280; line-height:1.75; }
 .about-card ol  { padding-left:16px; margin:0; }
 .about-card li  { margin-bottom:7px; }
 
