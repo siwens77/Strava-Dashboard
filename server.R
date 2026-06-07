@@ -510,37 +510,34 @@ server <- function(input, output, session) {
       
     if (nrow(weekly) < 2) return(empty_plot("Not enough weeks for trend"))
     
-    timeline <- data.frame(week = seq(min(weekly$week), max(weekly$week), by = "week"))
+    start_date <- if (!is.null(input$pf_dates)) lubridate::floor_date(as.Date(input$pf_dates[1]), "week", week_start = 1) else min(weekly$week)
+    end_date   <- if (!is.null(input$pf_dates)) lubridate::floor_date(as.Date(input$pf_dates[2]), "week", week_start = 1) else max(weekly$week)
+    end_date   <- max(start_date, end_date)
+    
+    timeline <- data.frame(week = seq(start_date, end_date, by = "week"))
     timeline <- timeline %>%
       left_join(weekly, by = "week") %>%
       mutate(cals = ifelse(is.na(cals), 0, cals))
     
-    timeline$trend <- NA
-    for (i in 1:nrow(timeline)) {
-      start_idx <- max(1, i - 3)
-      timeline$trend[i] <- mean(timeline$cals[start_idx:i])
-    }
-    
     p <- plotly::plot_ly(timeline) %>%
-      plotly::add_trace(x = ~week, y = ~cals, name = "Weekly Total",
-                type = "bar",
-                marker = list(color = paste0(ORANGE, "99")),
-                hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>Total: %{y:.0f} kcal<extra></extra>",
-                showlegend = TRUE) %>%
-      plotly::add_trace(x = ~week, y = ~trend, name = "4-Week Avg",
-                type = "scatter", mode = "lines",
-                line = list(color = ORANGE, width = 3, shape = "linear"),
-                hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>4-Week Avg: %{y:.0f} kcal/week<extra></extra>",
-                showlegend = TRUE)
+      plotly::add_trace(x = ~week, y = ~cals,
+                type = "scatter", mode = "lines+markers",
+                line = list(color = ORANGE, width = 3),
+                marker = list(color = ORANGE, size = 8, line = list(color = "white", width = 1.5)),
+                fill = "tozeroy", fillcolor = paste0(ORANGE, "33"),
+                hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>%{y:.0f} kcal<extra></extra>",
+                showlegend = FALSE)
     
-    strava_layout(p, xlab = "", ylab = "Calories (kcal)") %>%
+    strava_layout(p, xlab = "Weeks", ylab = "Calories (kcal)") %>%
        layout(
-         xaxis = list(type = "date", showticklabels = FALSE, showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+         xaxis = list(
+           type = "date", 
+           tickformat = "%b",
+           showticklabels = TRUE, 
+           showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
+         ),
          yaxis = list(rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
-         legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937")),
-         annotations = list(
-           list(x = 0.5, y = -0.15, text = "Weeks", showarrow = FALSE, xref = "paper", yref = "paper", font = list(size = 14, color = "#1f2937", family = "Inter, sans-serif"))
-         )
+         showlegend = FALSE
        )
   })
   
