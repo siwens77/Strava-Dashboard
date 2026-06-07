@@ -405,12 +405,12 @@ server <- function(input, output, session) {
     
     plotly::plot_ly(split,
             labels  = ~type, values = ~n,
-            type    = "pie", hole = 0.55,
+            type    = "pie",
             marker  = list(colors = activity_color(split$type),
                            line   = list(color = "white", width = 2)),
             texttemplate  = "%{label}<br>%{percent:.1%}",
-            textfont      = list(size = 11, color = "white"),  
-            insidetextfont = list(color = "white"),       
+            textfont      = list(size = 14, color = "white", family = "Inter, sans-serif"),  
+            insidetextfont = list(size = 14, color = "white", family = "Inter, sans-serif"),       
             hovertemplate = "<b>%{label}</b><br>%{value} activities (%{percent:.1%})<extra></extra>"
     ) %>%
       layout(
