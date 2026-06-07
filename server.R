@@ -133,7 +133,7 @@ server <- function(input, output, session) {
               div(class = "kpi-content",
                   div(class = "kpi-icon", icon("road")),
                   div(class = "kpi-text",
-                      p(class = "kpi-value", paste0(formatC(round(d), format = "d", big.mark = ","), " km")),
+                      p(class = "kpi-value", paste0(formatC(round(d), format = "d", big.mark = ","), " Kilometers")),
                       p(class = "kpi-label", "Total Distance")
                   )
               )
@@ -207,7 +207,7 @@ server <- function(input, output, session) {
   output$kpi_dist <- renderValueBox({
     d <- sum(ov_data()$distance_km, na.rm = TRUE)
     valueBox(
-      value    = paste0(formatC(round(d), format = "d", big.mark = ","), " km"),
+      value    = paste0(formatC(round(d), format = "d", big.mark = ","), " Kilometers"),
       subtitle = "Total Distance",
       icon     = icon("road"),
       color    = "green"
@@ -353,9 +353,9 @@ server <- function(input, output, session) {
           legend  = list(orientation = "h", y = -0.18, x = 0,
                          font = list(size = 13, color = "#1f2937")),
           xaxis   = list(type = "date", tickformat = "%b '%y",
-                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE),
-          yaxis   = list(title = list(font = list(size = 13, color = "#1f2937")),
-                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
+                         tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
+          yaxis   = list(title = list(text = "meters", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
+                         tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
         )
     } else {
       monthly <- df %>%
@@ -379,19 +379,19 @@ server <- function(input, output, session) {
                        x = sub$ym, y = sub$dist, name = t,
                        type   = "bar",
                        marker = list(color = activity_color(t)),
-                       hovertemplate = paste0("<b>", t, "</b><br>%{x|%b %Y}<br>%{y:.1f} km<extra></extra>")
+                       hovertemplate = paste0("<b>", t, "</b><br>%{x|%b %Y}<br>%{y:.1f} Kilometers<extra></extra>")
         )
       }
       
-      strava_layout(p, xlab = "", ylab = "km") %>%
+      strava_layout(p, xlab = "", ylab = "Kilometers") %>%
         layout(
           barmode = "stack",
           legend  = list(orientation = "h", y = -0.18, x = 0,
                          font = list(size = 13, color = "#1f2937")),
           xaxis   = list(type = "date", tickformat = "%b '%y",
-                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE),
-          yaxis   = list(title = list(font = list(size = 13, color = "#1f2937")),
-                         tickfont = list(size = 12, color = "#1f2937"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
+                         tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
+          yaxis   = list(title = list(text = "Kilometers", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
+                         tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
         )
     }
   })
@@ -535,9 +535,15 @@ server <- function(input, output, session) {
            type = "date", 
            tickformat = "%b",
            showticklabels = TRUE, 
+           title = list(text = "Weeks", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+           tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
            showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
          ),
-         yaxis = list(rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+         yaxis = list(
+           title = list(text = "Calories (kcal)", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+           tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
+           rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
+         ),
          margin = list(b = 75),
          showlegend = FALSE
        )
@@ -606,8 +612,16 @@ server <- function(input, output, session) {
       strava_layout(xlab = "", ylab = "Max HR (bpm)") %>%
       layout(
         showlegend = FALSE,
-        xaxis      = list(showgrid = FALSE, showline = TRUE),
-        yaxis      = list(showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+        xaxis      = list(
+          title = list(text = "", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
+          showgrid = FALSE, showline = TRUE
+        ),
+        yaxis      = list(
+          title = list(text = "Max HR (bpm)", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
+          showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
+        ),
         margin     = list(l = 50, b = 50, t = 20)
       )
   })
@@ -746,7 +760,7 @@ server <- function(input, output, session) {
         angularaxis = list(
           gridcolor = "#e5e7eb",
           linecolor = "#e5e7eb",
-          tickfont = list(size = 13, color = "#1f2937", family = "Inter", weight = "600")
+          tickfont = list(size = 15, color = "#1f2937", family = "Inter", weight = "600")
         ),
         bgcolor = "transparent"
       ),
@@ -838,8 +852,16 @@ server <- function(input, output, session) {
       layout(
         annotations = annotations,
         shapes = shapes,
-        xaxis = list(showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
-        yaxis = list(rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1),
+        xaxis = list(
+          title = list(text = "Avg Speed (m/s)", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
+          showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
+        ),
+        yaxis = list(
+          title = list(text = "Relative Effort", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
+          rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
+        ),
         legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 13, color = "#1f2937"))
       )
   })
