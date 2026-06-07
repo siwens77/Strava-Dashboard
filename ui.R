@@ -688,7 +688,7 @@ ui <- dashboardPage(
                   box(title = tagList(icon("crosshairs"), "Efficiency Quadrant"),
                       width = 6, class = "box-orange",
                       plotlyOutput("pf_quadrant", height = "320px")),
-                  box(title = tagList(icon("fire"), "Burned Calories Over Time"),
+                  box(title = tagList(icon("fire"), "Burned Calories per Week"),
                       width = 6, class = "box-orange",
                       plotlyOutput("pf_cals", height = "320px"))
                 )

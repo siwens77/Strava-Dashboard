@@ -530,7 +530,7 @@ server <- function(input, output, session) {
                 hovertemplate = "<b>Week of %{x|%d %b %Y}</b><br>%{y:.0f} kcal<extra></extra>",
                 showlegend = FALSE)
     
-    strava_layout(p, xlab = "Weeks", ylab = "Calories (kcal)") %>%
+    strava_layout(p, xlab = "Weeks", ylab = "") %>%
        layout(
          xaxis = list(
            type = "date", 
@@ -541,7 +541,8 @@ server <- function(input, output, session) {
            showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
          ),
          yaxis = list(
-           title = list(text = "Calories (kcal)", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+           title = list(text = ""),
+           ticksuffix = " kcal",
            tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
            rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
          ),
@@ -785,8 +786,8 @@ server <- function(input, output, session) {
              !is.na(calories), calories > 0)
     if (nrow(df) == 0) return(empty_plot("No effort/calories data"))
     
-    df$jittered_cal <- jitter(df$calories, amount = 15)
-    df$jittered_effort <- jitter(df$relative_effort, amount = 7.5)
+    df$jittered_cal <- jitter(df$calories, amount = 45)
+    df$jittered_effort <- jitter(df$relative_effort, amount = 15)
     
     med_cal  <- median(df$calories, na.rm = TRUE)
     med_effort <- median(df$relative_effort, na.rm = TRUE)
@@ -817,20 +818,25 @@ server <- function(input, output, session) {
     cal_range <- range(df$calories, na.rm = TRUE)
     effort_range <- range(df$relative_effort, na.rm = TRUE)
     
+    cal_max <- cal_range[2] * 1.05
+    cal_min <- cal_range[1] * 0.95
+    eff_max <- effort_range[2] * 1.05
+    eff_min <- effort_range[1] * 0.95
+    
     annotations <- list(
-      list(x = effort_range[2], y = cal_range[2],
+      list(x = eff_max, y = cal_max,
            text = "Hard + High Burn", showarrow = FALSE,
            font = list(size = 11, color = "#9f1239", family = "Inter"),
            xanchor = "right", yanchor = "top"),
-      list(x = effort_range[1], y = cal_range[2],
+      list(x = eff_min, y = cal_max,
            text = "Easy + High Burn", showarrow = FALSE,
            font = list(size = 11, color = "#10b981", family = "Inter"),
            xanchor = "left", yanchor = "top"),
-      list(x = effort_range[2], y = cal_range[1],
+      list(x = eff_max, y = cal_min,
            text = "Hard + Low Burn", showarrow = FALSE,
            font = list(size = 11, color = "#1e3a8a", family = "Inter"),
            xanchor = "right", yanchor = "bottom"),
-      list(x = effort_range[1], y = cal_range[1],
+      list(x = eff_min, y = cal_min,
            text = "Easy + Low Burn", showarrow = FALSE,
            font = list(size = 11, color = "#6b7280", family = "Inter"),
            xanchor = "left", yanchor = "bottom")
@@ -847,7 +853,7 @@ server <- function(input, output, session) {
            line = list(color = "#d1d5db", width = 1, dash = "dot"))
     )
     
-    strava_layout(p, xlab = "Relative Effort", ylab = "Calories (kcal)") %>%
+    strava_layout(p, xlab = "Relative Effort", ylab = "") %>%
       layout(
         annotations = annotations,
         shapes = shapes,
@@ -857,7 +863,8 @@ server <- function(input, output, session) {
           showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
         yaxis = list(
-          title = list(text = "Calories (kcal)", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          title = list(text = ""),
+          ticksuffix = " kcal",
           tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
           rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
@@ -870,7 +877,8 @@ server <- function(input, output, session) {
     ins_filtered() %>%
       filter(!is.na(avg_speed), avg_speed > 0) %>%
       mutate(avg_speed = avg_speed * 3.6,
-             avg_speed_jitter = jitter(avg_speed, amount = 0.3)) %>%
+             avg_speed_jitter = jitter(avg_speed, amount = 1.0),
+             date_jitter = as.POSIXct(as.character(date), tz="UTC") + runif(n(), -8*3600, 8*3600)) %>%
       arrange(date) %>%
       mutate(row_key = row_number())
   })
@@ -893,7 +901,7 @@ server <- function(input, output, session) {
     
     plotly::plot_ly(source = "ins_pace") %>%
       plotly::add_trace(data = df,
-                x = ~date, y = ~avg_speed_jitter,
+                x = ~date_jitter, y = ~avg_speed_jitter,
                 customdata = ~avg_speed,
                 key = ~row_key,
                 type   = "scatter", mode = "markers",
@@ -939,8 +947,8 @@ server <- function(input, output, session) {
       if (nrow(hit) == 0) return()
       
       plotlyProxyInvoke(proxy, "addTraces", list(
-        x          = list(as.character(hit$date[1])),
-        y          = list(hit$avg_speed[1]),
+        x          = list(as.character(hit$date_jitter[1])),
+        y          = list(hit$avg_speed_jitter[1]),
         type       = "scatter",
         mode       = "markers",
         marker     = list(color = "#FF2D00", size = 18, opacity = 1,
