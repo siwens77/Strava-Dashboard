@@ -573,12 +573,9 @@ server <- function(input, output, session) {
 
       ht <- paste0(
         "<b>", sport, "</b><br>",
-        "n: ", n_val, "<br>",
+        "Count: ", n_val, "<br>",
         "Min: ", min_val, " bpm<br>",
-        "Q1: ", q1_val, " bpm<br>",
         "Median: ", med_val, " bpm<br>",
-        "Mean: ", mean_val, " bpm<br>",
-        "Q3: ", q3_val, " bpm<br>",
         "Max: ", max_val, " bpm",
         "<extra></extra>"
       )
@@ -808,6 +805,7 @@ server <- function(input, output, session) {
         ),
         text = paste0(
           sport_df$name,
+          "\nDistance: ", round(sport_df$distance_km, 1), " km",
           "\nSpeed: ", round(sport_df$avg_speed, 2), " m/s",
           "\nEffort: ", round(sport_df$relative_effort)
         ),
@@ -1001,6 +999,7 @@ server <- function(input, output, session) {
     table_data <- df %>%
       arrange(desc(date)) %>%
       mutate(
+        raw_date    = as.numeric(as.POSIXct(date)),
         Date        = format(date, "%d %b %Y"),
         Name        = name,
         Type        = type,
@@ -1010,7 +1009,7 @@ server <- function(input, output, session) {
         `Duration (min)` = ifelse(!is.na(moving_time_min), as.character(moving_time_min), "—"),
         `Max HR`    = ifelse(!is.na(max_hr), as.character(max_hr), "—")
       ) %>%
-      select(Date, Name, Type, `Dist (km)`, `Elev (m)`, Calories, `Duration (min)`, `Max HR`)
+      select(Date, Name, Type, `Dist (km)`, `Elev (m)`, Calories, `Duration (min)`, `Max HR`, raw_date)
     
     datatable(
       table_data,
@@ -1022,7 +1021,9 @@ server <- function(input, output, session) {
         scrollX    = FALSE,
         dom        = "tip",
         columnDefs = list(
-          list(className = "dt-center", targets = 3:7)
+          list(className = "dt-center", targets = 3:7),
+          list(orderData = 8, targets = 0),
+          list(visible = FALSE, targets = 8)
         )
       )
     ) %>%

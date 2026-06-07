@@ -653,7 +653,7 @@ ui <- dashboardPage(
                   plotlyOutput("monthly_dist", height = "230px")
                 ),
                 box(
-                  title = tagList(icon("chart-pie"), "Activity Split (Total Sessions)"),
+                  title = tagList(icon("chart-pie"), "Activity Split by Total Sessions"),
                   width = 4, class = "box-orange",
                   plotlyOutput("ov_donut",     height = "276px")
                 )
@@ -677,10 +677,10 @@ ui <- dashboardPage(
                
 
                fluidRow(
-                 box(title = tagList(icon("heartbeat"), "Max HR Distribution by Sport"),
+                 box(title = tagList(icon("heartbeat"), "Maximal Heart Rate Distribution"),
                      width = 6, class = "box-orange",
                      plotlyOutput("pf_violin", height = "320px")),
-                 box(title = tagList(icon("bullseye"), "Sport Profile Radar"),
+                 box(title = tagList(icon("bullseye"), "Comparative Sport Profile"),
                      width = 6, class = "box-orange",
                      plotlyOutput("pf_radar", height = "320px"))
                ),
@@ -688,7 +688,7 @@ ui <- dashboardPage(
                   box(title = tagList(icon("crosshairs"), "Efficiency Quadrant"),
                       width = 6, class = "box-orange",
                       plotlyOutput("pf_quadrant", height = "320px")),
-                  box(title = tagList(icon("fire"), "Calories Over Time"),
+                  box(title = tagList(icon("fire"), "Burned Calories Over Time"),
                       width = 6, class = "box-orange",
                       plotlyOutput("pf_cals", height = "320px"))
                 )
@@ -711,7 +711,7 @@ ui <- dashboardPage(
               
 
               fluidRow(style = "display:flex; flex-wrap:wrap; align-items:stretch;",
-                box(title = tagList(icon("chart-line"), "Average Speed"),
+                box(title = tagList(icon("chart-line"), "Average Speed Trend"),
                     width = 8, class = "box-orange",
                     plotlyOutput("ins_pace", height = "420px")),
                 box(title = tagList(icon("trophy"), "Personal Records"),
@@ -721,7 +721,7 @@ ui <- dashboardPage(
               
 
               fluidRow(
-                box(title = tagList(icon("medal"), "Top Activities"),
+                box(title = tagList(icon("medal"), "All Activities"),
                     width = 12, class = "box-orange",
                     uiOutput("ins_hover_info"),
                     div(id = "ins_table_wrap",
@@ -789,12 +789,12 @@ ui <- dashboardPage(
                                                 tags$ol(
                                                   tags$li(tags$strong("Overview:"),
                                                           " All-time statistics, a GitHub-style activity calendar, monthly ",
-                                                          "activity bars, and an activity pie chart. Filterable by year and dynamically detected sports."),
+                                                          "activity bars, and an Activity Split by Total Sessions pie chart. Filterable by year and dynamically detected sports."),
                                                    tags$li(tags$strong("Performance:"),
-                                                           " Violin plot of max heart rate distribution by sport, Efficiency Quadrant showing effort vs speed with quadrant labels, Sport Profile Radar with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and a sleek Calories Over Time area chart. Filterable by sport and date range."),
+                                                           " Violin plot of maximal heart rate distribution, Efficiency Quadrant showing effort vs speed with quadrant labels, Comparative Sport Profile with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and a sleek Burned Calories Over Time area chart. Filterable by sport and date range."),
                                                   tags$li(tags$strong("Insights:"),
-                                                          " Average-speed timeline with pacing jitter, ",
-                                                          "personal records leaderboard, and ranked top-activities table. Filterable by year and sport."),
+                                                          " Average Speed Trend timeline with pacing jitter, ",
+                                                          "personal records leaderboard, and ranked all-activities table. Filterable by year and sport."),
                                                   tags$li(tags$strong("AI Chatbot:"),
                                                           " A personal chatbot powered by your training data, ",
                                                           "designed to act as your ultimate motivational coach (Powered by BielikAI).")
