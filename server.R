@@ -265,7 +265,8 @@ server <- function(input, output, session) {
     plotly::plot_ly(all_days,
             x = ~wk, y = ~dow, z = ~n,
             type          = "heatmap",
-            colorscale    = list(c(0,"#f3f4f6"), c(0.01,"#ffd4c2"), c(1, ORANGE)),
+            xgap          = 3, ygap = 3,
+            colorscale    = list(c(0,"#ebedf0"), c(0.01,"#ffdfd1"), c(0.5,"#fc8451"), c(1, ORANGE)),
             showscale     = TRUE,
             colorbar      = list(
               title = "",
