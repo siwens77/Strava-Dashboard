@@ -347,14 +347,14 @@ server <- function(input, output, session) {
         )
       }
       
-      strava_layout(p, xlab = "", ylab = "Meters") %>%
+      strava_layout(p, xlab = "", ylab = "") %>%
         layout(
           barmode = "stack",
-          legend  = list(orientation = "h", y = -0.18, x = 0,
-                         font = list(size = 13, color = "#1f2937")),
+          legend  = list(orientation = "h", x = -0.05, y = -0.33,
+                         font = list(size = 16, color = "#1f2937")),
           xaxis   = list(type = "date", tickformat = "%b", dtick = "M1",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
-          yaxis   = list(title = list(text = "Meters", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
+          yaxis   = list(title = list(text = ""), ticksuffix = " m",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
         )
     } else {
@@ -383,14 +383,14 @@ server <- function(input, output, session) {
         )
       }
       
-      strava_layout(p, xlab = "", ylab = "Kilometers") %>%
+      strava_layout(p, xlab = "", ylab = "") %>%
         layout(
           barmode = "stack",
-          legend  = list(orientation = "h", y = -0.18, x = 0,
-                         font = list(size = 13, color = "#1f2937")),
+          legend  = list(orientation = "h", x = -0.05, y = -0.33,
+                         font = list(size = 16, color = "#1f2937")),
           xaxis   = list(type = "date", tickformat = "%b", dtick = "M1",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
-          yaxis   = list(title = list(text = "Kilometers", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
+          yaxis   = list(title = list(text = ""), ticksuffix = " km",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
         )
     }
@@ -536,7 +536,7 @@ server <- function(input, output, session) {
            type = "date", 
            tickformat = "%b '%y",
            showticklabels = TRUE, 
-           title = list(text = "Time", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+           title = list(text = "Time", font = list(size = 16, color = "#111827", family = "Inter, sans-serif"), standoff = 8),
            tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
            showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
          ),
@@ -847,7 +847,7 @@ server <- function(input, output, session) {
            line = list(color = "#d1d5db", width = 1, dash = "dot"))
     )
     
-    strava_layout(p, xlab = "Relative Effort", ylab = "Burned Calories") %>%
+    strava_layout(p, xlab = "Relative Effort", ylab = "Calories (kcal)") %>%
       layout(
         annotations = annotations,
         shapes = shapes,
@@ -857,11 +857,11 @@ server <- function(input, output, session) {
           showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
         yaxis = list(
-          title = list(text = "Burned Calories", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+          title = list(text = "Calories (kcal)", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
           tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
           rangemode = "tozero", showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
         ),
-        legend = list(orientation = "h", x = 0, y = -0.28, font = list(size = 16, color = "#1f2937"))
+        legend = list(orientation = "h", x = -0.05, y = -0.33, font = list(size = 16, color = "#1f2937"))
       )
   })
   

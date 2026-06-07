@@ -119,10 +119,10 @@ body, .wrapper { background: linear-gradient(135deg, #f0f2f5 0%, #e8eaef 100%) !
 .navbar-custom-menu > .nav > li > a  { color: white !important; }
 .logo-wrap { display:flex; align-items:center; gap:9px; }
 .logo-img {
-  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  width: 42px; height: 42px; border-radius: 9px; flex-shrink: 0;
   object-fit: cover;
 }
-.logo-name { color:white; font-weight:900; font-size:17px; letter-spacing:3px; }
+.logo-name { color:white; font-weight:900; font-size:22px; letter-spacing:3px; }
 .skin-black .main-sidebar,
 .skin-black .left-side    { background: #16161f !important; }
 .skin-black .sidebar a    { color: #9ca3af !important; }
