@@ -533,9 +533,9 @@ server <- function(input, output, session) {
        layout(
          xaxis = list(
            type = "date", 
-           tickformat = "%b",
+           tickformat = "%b '%y",
            showticklabels = TRUE, 
-           title = list(text = "Weeks", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
+           title = list(text = "Time", font = list(size = 16, color = "#111827", family = "Inter, sans-serif")),
            tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"),
            showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1
          ),

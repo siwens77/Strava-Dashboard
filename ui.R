@@ -772,6 +772,7 @@ ui <- dashboardPage(
                                                    "Track training patterns, monitor performance trends, contact a personalized AI coach and celebrate ",
                                                    "personal achievements — all in one beautiful, interactive interface."
                                                    ),
+                                                 tags$p(tags$em("Developed by Krzysztof Nowak and Kajetan Wojnicki.")),
                                                 tags$hr(),
                                                 tags$h3(icon("database"), " Data"),
                                                 tags$p(
@@ -788,12 +789,12 @@ ui <- dashboardPage(
                                                 tags$ol(
                                                   tags$li(tags$strong("Overview:"),
                                                           " All-time statistics, a GitHub-style activity calendar, monthly ",
-                                                          "distance bars, and an activity pie chart. Filter by year and dynamically detected sports."),
+                                                          "activity bars, and an activity pie chart. Filterable by year and dynamically detected sports."),
                                                    tags$li(tags$strong("Performance:"),
                                                            " Violin plot of max heart rate distribution by sport, Efficiency Quadrant showing effort vs speed with quadrant labels, Sport Profile Radar with normalized metrics for elevation, speed, distance, effort, calories, and max HR, and a sleek Calories Over Time area chart. Filterable by sport and date range."),
                                                   tags$li(tags$strong("Insights:"),
                                                           " Average-speed timeline with pacing jitter, ",
-                                                          "personal records leaderboard, and ranked top-activities table, all filter by year and sport."),
+                                                          "personal records leaderboard, and ranked top-activities table. Filterable by year and sport."),
                                                   tags$li(tags$strong("AI Chatbot:"),
                                                           " A personal chatbot powered by your training data, ",
                                                           "designed to act as your ultimate motivational coach (Powered by BielikAI).")
