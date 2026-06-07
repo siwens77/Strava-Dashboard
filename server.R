@@ -31,8 +31,8 @@ server <- function(input, output, session) {
     types <- sort(unique(df$type))
     
     updateSelectInput(session, "ov_year",
-                      choices  = c("All", as.character(years)),
-                      selected = "All")
+                      choices  = as.character(years),
+                      selected = as.character(years[1]))
     updateSelectInput(session, "ov_type",
                       choices  = c("All", types),
                       selected = "All")
@@ -46,7 +46,7 @@ server <- function(input, output, session) {
   
   ov_data <- reactive({
     df <- activities_raw()
-    if (!is.null(input$ov_year) && input$ov_year != "All")
+    if (!is.null(input$ov_year))
       df <- df[df$year == as.integer(input$ov_year), ]
     if (!is.null(input$ov_type) && input$ov_type != "All")
       df <- df[df$type == input$ov_type, ]
@@ -133,7 +133,7 @@ server <- function(input, output, session) {
               div(class = "kpi-content",
                   div(class = "kpi-icon", icon("road")),
                   div(class = "kpi-text",
-                      p(class = "kpi-value", paste0(formatC(round(d), format = "d", big.mark = ","), " Kilometers")),
+                      p(class = "kpi-value", paste0(formatC(round(d), format = "d", big.mark = ","), " km")),
                       p(class = "kpi-label", "Total Distance")
                   )
               )
@@ -207,7 +207,7 @@ server <- function(input, output, session) {
   output$kpi_dist <- renderValueBox({
     d <- sum(ov_data()$distance_km, na.rm = TRUE)
     valueBox(
-      value    = paste0(formatC(round(d), format = "d", big.mark = ","), " Kilometers"),
+      value    = paste0(formatC(round(d), format = "d", big.mark = ","), " km"),
       subtitle = "Total Distance",
       icon     = icon("road"),
       color    = "green"
@@ -238,7 +238,7 @@ server <- function(input, output, session) {
     df <- ov_data()
     if (nrow(df) == 0) return(empty_plot())
     
-    yr <- if (!is.null(input$ov_year) && input$ov_year != "All")
+    yr <- if (!is.null(input$ov_year))
       as.integer(input$ov_year)
     else as.integer(format(max(df$date, na.rm = TRUE), "%Y"))
     
@@ -352,7 +352,7 @@ server <- function(input, output, session) {
           barmode = "stack",
           legend  = list(orientation = "h", y = -0.18, x = 0,
                          font = list(size = 13, color = "#1f2937")),
-          xaxis   = list(type = "date", tickformat = "%b '%y",
+          xaxis   = list(type = "date", tickformat = "%b",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
           yaxis   = list(title = list(text = "meters", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
@@ -388,7 +388,7 @@ server <- function(input, output, session) {
           barmode = "stack",
           legend  = list(orientation = "h", y = -0.18, x = 0,
                          font = list(size = 13, color = "#1f2937")),
-          xaxis   = list(type = "date", tickformat = "%b '%y",
+          xaxis   = list(type = "date", tickformat = "%b",
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE),
           yaxis   = list(title = list(text = "Kilometers", font = list(size = 14, color = "#111827", family = "Inter, sans-serif")),
                          tickfont = list(size = 13, color = "#374151", family = "Inter, sans-serif"), showgrid = FALSE, showline = TRUE, linecolor = "#d1d5db", linewidth = 1)
@@ -772,8 +772,8 @@ server <- function(input, output, session) {
         font = list(color = "white", size = 12, family = "Inter")
       ),
       legend = list(
-        orientation = "h", x = 0, y = -0.15,
-        font = list(size = 10, family = "Inter")
+        orientation = "h", x = -0.1, y = -0.15,
+        font = list(size = 14, family = "Inter")
       ),
       margin = list(l = 50, r = 50, t = 30, b = 50),
       showlegend = TRUE

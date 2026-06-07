@@ -618,8 +618,8 @@ ui <- dashboardPage(
                 column(3,
                        tags$span(class = "filter-label", "Year"),
                        selectInput("ov_year", NULL,
-                                   choices  = c("All"),
-                                   selected = "All", width = "100%")
+                                   choices  = c(format(Sys.Date(), "%Y")),
+                                   selected = format(Sys.Date(), "%Y"), width = "100%")
                 )
               ),
               
