@@ -820,7 +820,7 @@ server <- function(input, output, session) {
     annotations <- list(
       list(x = effort_range[2], y = cal_range[2],
            text = "Hard + High Burn", showarrow = FALSE,
-           font = list(size = 11, color = "#ef4444", family = "Inter"),
+           font = list(size = 11, color = "#9f1239", family = "Inter"),
            xanchor = "right", yanchor = "top"),
       list(x = effort_range[1], y = cal_range[2],
            text = "Easy + High Burn", showarrow = FALSE,
@@ -828,7 +828,7 @@ server <- function(input, output, session) {
            xanchor = "left", yanchor = "top"),
       list(x = effort_range[2], y = cal_range[1],
            text = "Hard + Low Burn", showarrow = FALSE,
-           font = list(size = 11, color = "#f59e0b", family = "Inter"),
+           font = list(size = 11, color = "#1e3a8a", family = "Inter"),
            xanchor = "right", yanchor = "bottom"),
       list(x = effort_range[1], y = cal_range[1],
            text = "Easy + Low Burn", showarrow = FALSE,
