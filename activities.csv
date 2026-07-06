@@ -1,4 +1,5 @@
 activity_id,date,name,type,description,elapsed_time_s,distance_km,max_hr,relative_effort,elapsed_time2,moving_time_s,distance_m,max_speed,avg_speed,elevation_gain,elevation_loss,elevation_low,elevation_high,max_grade,avg_grade,calories
+19185271290,2026-07-05,Posesyjny Run,Run,,4245,15.06,192.0,264.0,4245,4235,15055.9,6.14,3.555,20.4,0,89.8,103.4,,,1088.0
 19160598604,2026-07-03,Matcha Walk,Walk,,4849,4.59,120.0,7.0,4849,3221,4589.2,3.707,1.425,38.8,0,60.6,89.2,,,252.0
 18947293132,2026-06-16,Evening HIIT,Workout,,2227,0.0,190.0,76.0,2227,2227,0.0,0.0,0.0,0,0,0.0,0.0,,,474.0
 18854933107,2026-06-09,Evening HIIT,Workout,,4712,0.0,190.0,144.0,4712,4712,0.0,0.0,0.0,0,0,0.0,0.0,,,1013.0
