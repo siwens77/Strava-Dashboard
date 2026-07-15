@@ -1,4 +1,5 @@
 activity_id,date,name,type,description,elapsed_time_s,distance_km,max_hr,relative_effort,elapsed_time2,moving_time_s,distance_m,max_speed,avg_speed,elevation_gain,elevation_loss,elevation_low,elevation_high,max_grade,avg_grade,calories
+19311373070,2026-07-14,Afternoon Swim,Swim,,2366,1.1,162.0,14.0,2366,1274,1100.0,5.0,0.863,0,0,,,,,317.0
 19295760119,2026-07-13,Afternoon Run,Run,o cholera jak gorąco,2780,10.01,190.0,166.0,2780,2764,10006.3,4.56,3.62,15.0,0,89.4,94.6,,,813.0
 19244480411,2026-07-09,Afternoon Run,Run,dziś profeska,4120,15.03,190.0,232.0,4120,4117,15029.2,5.56,3.651,24.4,0,89.0,98.0,,,1088.0
 19216587816,2026-07-07,Afternoon Run,Run,padało.,2797,10.08,190.0,167.0,2797,2789,10084.2,4.98,3.616,19.2,0,91.6,98.8,,,732.0
