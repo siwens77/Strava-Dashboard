@@ -34,23 +34,42 @@ def fetch_detailed_activities():
     print("Step 1: Finding activity IDs...")
     params = {"per_page": 200, "page": 1}
     list_res = requests.get(list_url, headers=headers, params=params)
+    
+    # Check if the list call failed
+    if list_res.status_code != 200:
+        print(f"❌ Failed to fetch activity list (HTTP {list_res.status_code}): {list_res.text}")
+        sys.exit(1)
+        
     summary_activities = list_res.json()
+    
+    # Ensure response is a list
+    if not isinstance(summary_activities, list):
+        print(f"❌ Unexpected response structure from Strava: {summary_activities}")
+        sys.exit(1)
     
     detailed_data = []
     
     print(f"Step 2: Fetching full details for {len(summary_activities)} activities...")
     for i, summary in enumerate(summary_activities):
+        if not isinstance(summary, dict) or 'id' not in summary:
+            print(f"⚠️ Skipping invalid item: {summary}")
+            continue
+
         activity_id = summary['id']
         
-        detail_res = requests.get(f"{base_url}{activity_id}", headers=headers)
-        
-        if detail_res.status_code == 200:
-            detailed_data.append(detail_res.json())
-            print(f"[{i+1}/{len(summary_activities)}] Fetched: {summary['name']}")
-        elif detail_res.status_code == 429:
-            print("⚠️ Rate limit hit! Waiting 15 minutes...")
-            time.sleep(15 * 60) 
-        
+        while True:
+            detail_res = requests.get(f"{base_url}{activity_id}", headers=headers)
+            
+            if detail_res.status_code == 200:
+                detailed_data.append(detail_res.json())
+                print(f"[{i+1}/{len(summary_activities)}] Fetched: {summary.get('name', 'Unknown')}")
+                break
+            elif detail_res.status_code == 429:
+                print("⚠️ Rate limit hit! Waiting 15 minutes...")
+                time.sleep(15 * 60)
+            else:
+                print(f"⚠️ Failed to fetch activity {activity_id}: {detail_res.status_code}")
+                break
 
     save_to_csv(detailed_data)
 
