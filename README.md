@@ -9,6 +9,8 @@
 
 ---
 
+# PROJECT IS NOT UPDATING ANYMORE DUE TO MISSING STRAVA SUBSCRIPTION
+
 ## Features
 
 ### Overview
